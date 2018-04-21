@@ -44,7 +44,7 @@ Vue.component('task', { //hypenated names is best practice
 });
 
 
-Vue.component('task-list', { //hypenated names is best practice
+Vue.component('task-list', { //hyphenated names is best practice
 
   template: `
   <div>
@@ -54,6 +54,24 @@ Vue.component('task-list', { //hypenated names is best practice
       </span>
       Add task
     </button>
+    <div class="card" v-if="showInputForm">
+      <div class="card-header">
+        <div class="card-header-title">Add a new task</div>
+      </div>
+      <div class="card-content">
+        <form>
+          <input type="text" name="description" v-model="newtask.description"/>
+        </form>
+      </div>
+      <div class="card-footer">
+        <button class="button has-background-info" @click="saveTask">
+          <span class="icon">
+            <i class="fas fa-save"></i>
+          </span>
+          Save
+        </button>
+      </div>
+    </div>
     <div>
       <task v-for="task in tasks" :key="task.id" :taskName="task.description"></task>
     </div>
@@ -72,14 +90,31 @@ Vue.component('task-list', { //hypenated names is best practice
         { id: 3, description: 'do laundry', completed: true },
         { id: 4,  description: 'study vue', completed: false },
         { id: 5, description: 'write letter', timed:'true', completed: true }
-      ]
+      ],
+      newtask: {},
+      showInputForm:false
     }
   },
 
   methods: {
     addTask() {
-      alert("todo: add task modal");
+      this.showInputForm = true;
+    },
+    saveTask() {
+      this.tasks.push(this.newtask);
+    },
+    setBlankTask() {
+      this.newtask = {
+        description: '',
+        timed: false,
+        completed: false
+      };
     }
+  },
+
+  mounted() {
+    this.setBlankTask();
+    console.log("***", this.newtask);
   },
 
   computed: {
