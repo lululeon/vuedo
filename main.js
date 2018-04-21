@@ -1,12 +1,15 @@
 Vue.component('task', { //hypenated names is best practice
   props: {
-    taskName: {
-      type: String
+    task: {
+      type: Object
     },
     executions: {
       default: 0,
       type: Number
     },
+    onDelete: {
+      type: Function
+    }
   },
 
   data() {
@@ -16,29 +19,35 @@ Vue.component('task', { //hypenated names is best practice
   },
 
   template: `
-  <article class="task" v-show="isVisible">
-    <header class="task-header">
-      <p class="task-header-title">
-        {{taskName}}
-      </p>
-      <a href="#" class="task-header-executions" aria-label="total number of executions">
-        {{executions}}
-      </a>
-    </header>
+  <article class="task">
     <div class="task-meta">
+      <header class="task-meta-header">
+        <p class="task-meta-header-title">
+          {{task.description}}
+        </p>
+      </header>
+      <div class="task-meta-detail">
+        <span class="task-meta-detail-id" aria-label="task id">{{task.id}}</span>
+      </div>
+      <footer class="task-meta-footer">
+        <button class="button primary is-medium"><span class="icon"><i class="fas fa-save"></i></span>Save</button>
+        <button class="button primary is-medium"><span class="icon"><i class="fas fa-edit"></i></span>Edit</button>
+        <button class="button primary is-medium" @click="deleteTask"><span class="icon"><i class="fas fa-trash-alt"></i></span>Delete</button>
+      </footer>
     </div>
-    <footer class="task-footer">
-      <button class="button primary is-medium"><span class="icon"><i class="fas fa-save"></i></span>Save</button>
-      <button class="button primary is-medium"><span class="icon"><i class="fas fa-edit"></i></span>Edit</button>
-      <button class="button primary is-medium" @click="deleteTask"><span class="icon"><i class="fas fa-trash-alt"></i></span>Delete</button>
-    </footer>
+    <div class="task-measure">
+      <a href="#" class="task-measure-count" aria-label="current count">{{task.count}}</a>
+    </div>
+    <div class="task-measure">
+      <a href="#" class="task-measure-addcount" aria-label="increment count">+</a>
+    </div>
   </article>
   `,
 
   methods: {
     deleteTask() {
-      this.isVisible = false;
-      console.log(this.isVisible);
+      //this.isVisible = false;
+      this.onDelete(this.task.id);
     }
   }
 });
@@ -48,7 +57,7 @@ Vue.component('task-list', { //hyphenated names is best practice
 
   template: `
   <div>
-    <button class="button has-background-info" @click="addTask">
+    <button class="button" @click="addTask">
       <span class="icon">
         <i class="fas fa-plus"></i>
       </span>
@@ -73,7 +82,7 @@ Vue.component('task-list', { //hyphenated names is best practice
       </div>
     </div>
     <div>
-      <task v-for="task in tasks" :key="task.id" :taskName="task.description"></task>
+      <task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask"></task>
     </div>
     <p>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
@@ -85,12 +94,25 @@ Vue.component('task-list', { //hyphenated names is best practice
     //in components, you must RETURN the data object
     return {
       tasks: [
-        { id: 1, description: 'Go to the store', timed:'true', completed: false },
-        { id: 2, description: 'tidy up', timed:'true', completed: false },
-        { id: 3, description: 'do laundry', completed: true },
-        { id: 4,  description: 'study vue', completed: false },
-        { id: 5, description: 'write letter', timed:'true', completed: true }
+        { id: 1, description: 'Jazz practice', timed:'true', count:2, targetReached: false, 
+          metric: {
+            timeWindow: 'day', //day|week|month|quarter|year
+            uom: 'hour', //all UOMs... lb, kilo, miles, km, minutes, etc... incl. custom
+            measureTarget: 4
+          }
+        },
+        { id: 2, description: 'Math practice', timed:'true', count:3, targetReached: false },
+        { id: 3, description: 'do laundry', count:1, targetReached: true },
+        { id: 4,  description: 'Make a new connection', count:2, targetReached: false },
+        { id: 5, description: 'write letter', timed:'true', count:1, targetReached: true }
       ],
+
+      measures: [
+        { taskId: 1, timestamp:'2018-01-15', value: 2, targetReached: false },
+        { taskId: 1, timestamp:'2018-01-31', value: 4, targetReached: false }
+      ],
+
+      nextId: 1,
       newtask: {},
       showInputForm:false
     }
@@ -103,18 +125,32 @@ Vue.component('task-list', { //hyphenated names is best practice
     saveTask() {
       this.tasks.push(this.newtask);
     },
+    deleteTask(taskId) {
+      let idx = this.tasks.findIndex((task)=>{
+        return (task.id == taskId);
+      });
+      this.tasks.splice(idx, 1);
+    },
     setBlankTask() {
       this.newtask = {
+        id: this.nextId,
         description: '',
         timed: false,
-        completed: false
+        count: 0,
+        targetReached: false
       };
+      console.log(" ***** blank task created with id:", this.nextId);
+      console.log(" ***", this.newtask);
     }
   },
 
   mounted() {
+    //initialize id generation
+    this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
+      return Math.max(nextItem.id, accumulator);
+    }, 0);
+    //set up next task
     this.setBlankTask();
-    console.log("***", this.newtask);
   },
 
   computed: {
