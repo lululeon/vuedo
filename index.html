@@ -11,23 +11,43 @@
         padding: 3rem;
       }
       .task {
+        display: flex;
+        flex-direction: row;
         background: #f1f1f1;
         padding: 1rem;
         margin: 0.8rem 0;
         border-radius: 0.3rem;
       }
-      .task-header {
-        display: flex;
+      .task-meta {
+        flex-grow: 2;
       }
-      .task-header-title {
-        width: 80%;
+      .task-meta-header-title {
+        font-size: 1.75rem;
+        color:#4a98b7;
+      }
+      .task-measure {
+        font-size: 3rem;
+        background-color: #adccd8;
+        border-radius: 0.3rem;
+        margin: 0.2rem;
+      }
+      .task-measure:last-of-type {
+        background-color: #4a98b7;
       }
       /*a, a:hover, a:active, a:link { text-decoration: none; }*/
       .button .icon:first-child:last-child { margin: inherit; } /*bulma fix*/
-      a.task-header-executions {
-          font-size: 3rem;
-          margin: 0;
-          padding: 0;
+      a.task-meta-id {
+        color: grey;
+      }
+      a.task-measure-count {
+        padding: 2rem;
+        color: white;
+        display: inline-block;
+      }
+      a.task-measure-addcount {
+        padding: 2rem;
+        color: white;
+        display: inline-block;
       }
       .template-type {
         font-style: italic;
