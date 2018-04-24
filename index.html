@@ -11,53 +11,43 @@
         padding: 3rem;
       }
       .task {
-        display: flex;
-        flex-direction: row;
-        background: #f1f1f1;
+        border: 1px solid #eee;
         padding: 1rem;
         margin: 0.8rem 0;
         border-radius: 0.3rem;
       }
-      .task-meta {
-        flex-grow: 2;
+      .task-header {
+        display: flex;
+        background-color: #e3eff9;
+        border-radius: 0.3rem;
+        padding: 1rem;
+
       }
-      .task-meta-header-title {
+      .task-header-title {
+        flex-grow: 2;
         font-size: 1.75rem;
-        color:#4a98b7;
       }
       .task-measure {
-        font-size: 3rem;
-        background-color: #adccd8;
+        font-size: 1.5rem;
         border-radius: 0.3rem;
         margin: 0.2rem;
+        background-color: grey;
       }
-      .task-measure:last-of-type {
-        background-color: #4a98b7;
+      .task-body {
+        padding: 1rem;
       }
       /*a, a:hover, a:active, a:link { text-decoration: none; }*/
       .button .icon:first-child:last-child { margin: inherit; } /*bulma fix*/
       a.task-meta-id {
         color: grey;
       }
-      a.task-measure-count {
-        padding: 2rem;
+      a.task-measure-count, a.task-measure-addcount {
         color: white;
         display: inline-block;
+        padding:1rem;
       }
-      a.task-measure-addcount {
-        padding: 2rem;
-        color: white;
-        display: inline-block;
-      }
-      .template-type {
-        font-style: italic;
-        color: #FFC107;
-      }
-      .curdate {
-        color: brown;
-      }
-      .dotext {
-        color: #4a98b7;
+      .curdate, .template-type {
+        font-weight: bold;
       }
     </style>
   </head>
@@ -65,10 +55,8 @@
     <div id="app">
       <div class="container">
         <div class="content">
-          <h1>Vue<span class="dotext">do</span></h1>
-          <p class="slogan">The magical art of execution</p>
-          <h2>Executing the <span class="template-type">{{ dayTemplateType }}</span> template for <span class="curdate">{{ currentDay }}</span></h2>
-          <h3>Things to do today.</h3>
+          <h1>Vue<span class="has-text-info">do</span></h1>
+          <p class="slogan">The magical art of execution || Executing the (<span class="template-type">{{ dayTemplateType }}</span>) template for <span class="curdate">{{ currentDay }}</span></p>
           <div id="task-list">
             <task-list>
           </div>
