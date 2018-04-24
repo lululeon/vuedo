@@ -3,10 +3,6 @@ Vue.component('task', { //hypenated names is best practice
     task: {
       type: Object
     },
-    executions: {
-      default: 0,
-      type: Number
-    },
     onDelete: {
       type: Function
     }
@@ -14,40 +10,41 @@ Vue.component('task', { //hypenated names is best practice
 
   data() {
     return {
-      isVisible: true
+      count: this.task.count
     };
   },
 
   template: `
   <article class="task">
-    <div class="task-meta">
-      <header class="task-meta-header">
-        <p class="task-meta-header-title">
-          {{task.description}}
-        </p>
-      </header>
-      <div class="task-meta-detail">
-        <span class="task-meta-detail-id" aria-label="task id">{{task.id}}</span>
+    <header class="task-header">
+      <p class="task-header-title">
+        {{task.description}}
+      </p>
+      <div class="task-measure" :class="{'has-background-success' : count > 0}">
+          <a href="#" class="task-measure-count" aria-label="current count">{{count}}</a>
       </div>
-      <footer class="task-meta-footer">
-        <button class="button primary is-medium"><span class="icon"><i class="fas fa-save"></i></span>Save</button>
-        <button class="button primary is-medium"><span class="icon"><i class="fas fa-edit"></i></span>Edit</button>
-        <button class="button primary is-medium" @click="deleteTask"><span class="icon"><i class="fas fa-trash-alt"></i></span>Delete</button>
-      </footer>
+      <div class="task-measure has-background-info">
+        <a class="task-measure-addcount" @click="incrementCount" aria-label="increment count">+</a>
+      </div>
+    </header>
+    <div class="task-body">
+      <p>Task ID: <span class="task-meta-detail-id" aria-label="task id">{{task.id}}</span></p>
+      <p>metadata / info to go here.</p>
     </div>
-    <div class="task-measure">
-      <a href="#" class="task-measure-count" aria-label="current count">{{task.count}}</a>
-    </div>
-    <div class="task-measure">
-      <a href="#" class="task-measure-addcount" aria-label="increment count">+</a>
+    <div class="task-footer">
+      <button class="button primary is-medium is-warning"><span class="icon"><i class="fas fa-edit"></i></span>Edit</button>
+      <button class="button primary is-medium is-danger" @click="deleteTask"><span class="icon"><i class="fas fa-trash-alt"></i></span>Delete</button>
     </div>
   </article>
   `,
 
   methods: {
     deleteTask() {
-      //this.isVisible = false;
       this.onDelete(this.task.id);
+      //todo: prompt to delete measures as well.
+    },
+    incrementCount() {
+      this.count += 1;
     }
   }
 });
@@ -57,23 +54,52 @@ Vue.component('task-list', { //hyphenated names is best practice
 
   template: `
   <div>
-    <button class="button" @click="addTask">
-      <span class="icon">
-        <i class="fas fa-plus"></i>
-      </span>
-      Add task
-    </button>
+    <div class="level">
+      <button class="button" v-show="!showInputForm" @click="addTask">
+        <span class="icon">
+          <i class="fas fa-plus"></i>
+        </span>
+        Add task
+      </button>
+    </div>
     <div class="card" v-if="showInputForm">
       <div class="card-header">
-        <div class="card-header-title">Add a new task</div>
+        <div class="card-header-title title has-background-warning">Add a new task</div>
       </div>
       <div class="card-content">
         <form>
-          <input type="text" name="description" v-model="newtask.description"/>
+          <div class="field">
+            <label class="label">What do you need to do?</label>
+            <div class="control has-icons-left has-icons-right">
+              <input class="input" :class="{'is-danger' : showNotifErrDescription}" type="text" :placeholder="placeholder" v-model="newtask.description">
+              <span class="icon is-small is-left">
+                <i class="fas fa-list-alt"></i>
+              </span>
+              <span class="icon is-small is-right" v-if="showNotifErrDescription">
+                <i class="fas fa-exclamation-triangle"></i>
+              </span>
+            </div>  
+            <p class="help is-success" v-if="showNotifOKDescription">Great!</p>
+            <p class="help is-danger" v-if="showNotifErrDescription">Do not leave blank - please enter a task description</p>
+          </div>
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox">
+                This is a timed task.
+              </label>
+            </div>
+          </div>
         </form>
       </div>
-      <div class="card-footer">
-        <button class="button has-background-info" @click="saveTask">
+      <div class="card-content level-right">
+        <button class="level-item button" v-show="showInputForm"  @click="showInputForm=false">
+          <span class="icon">
+            <i class="fas fa-ban"></i>
+          </span>
+          Cancel task addition
+        </button>
+        <button class="level-item button has-background-info" @click="saveTask">
           <span class="icon">
             <i class="fas fa-save"></i>
           </span>
@@ -82,7 +108,7 @@ Vue.component('task-list', { //hyphenated names is best practice
       </div>
     </div>
     <div>
-      <task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask"></task>
+      <task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask" ></task>
     </div>
     <p>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
@@ -114,16 +140,31 @@ Vue.component('task-list', { //hyphenated names is best practice
 
       nextId: 1,
       newtask: {},
-      showInputForm:false
+      showInputForm:false,
+      placeholder: "example: practice piano",
+      showNotifOKDescription: false,
+      showNotifErrDescription: false
     }
   },
 
   methods: {
     addTask() {
+      this.clearInputPanel();
       this.showInputForm = true;
     },
     saveTask() {
+      if(this.newtask.description === '' || this.newtask.description === this.placeholder) {
+        this.showNotifErrDescription = true;
+        return;
+      }
       this.tasks.push(this.newtask);
+      this.nextId += 1;
+      this.clearInputPanel();
+    },
+    clearInputPanel() {
+      this.setBlankTask();
+      this.showNotifOKDescription = false;
+      this.showNotifErrDescription = false;
     },
     deleteTask(taskId) {
       let idx = this.tasks.findIndex((task)=>{
