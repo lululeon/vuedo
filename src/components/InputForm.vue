@@ -8,7 +8,7 @@
                 <div class="field">
                 <label class="label">What do you need to do?</label>
                 <div class="control has-icons-left has-icons-right">
-                    <input class="input" :class="{'is-danger' : showNotifErrDescription}" type="text" :placeholder="placeholder" v-model="newtask.description">
+                    <input class="input" :class="{'is-danger' : showNotifErrDescription}" type="text" :placeholder="placeholder" v-model="newtask.description" />
                     <span class="icon is-small is-left">
                     <i class="fas fa-list-alt"></i>
                     </span>
@@ -64,19 +64,24 @@ export default {
       showNotifErrDescription: false
     }
   },
+  watch: {
+    nextId: function (newNextId, oldNextId) {
+      this.setBlankTask(newNextId);
+    }
+  },
   methods: {
     saveTask() {
       if(this.newtask.description === '' || this.newtask.description === this.placeholder) {
         this.showNotifErrDescription = true;
         return;
       }
-      this.clearInputPanel();
       //this.nextId += 1;
       //this.tasks.push(this.newtask);
       this.$emit('saveNewTask', this.newtask);
+      this.clearInputPanel();
     },
     clearInputPanel() {
-      this.setBlankTask();
+      //this.setBlankTask();
       this.showNotifOKDescription = false;
       this.showNotifErrDescription = false;
     },
@@ -86,9 +91,9 @@ export default {
       });
       this.tasks.splice(idx, 1);
     },
-    setBlankTask() {
+    setBlankTask(newNextId) {
       this.newtask = {
-        id: this.nextId,
+        id: newNextId || this.nextId, //first time, get from props; thereafter from watched prop changes.
         description: '',
         timed: false,
         count: 0,
