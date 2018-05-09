@@ -51,9 +51,31 @@ export default {
 </style>
 ```
 
+# components
+- note that since components are not bound to an actual instance, the data attribute needs to be a *function* that returns the data obj, to be called later when the component is instantiated.
+- the template must return a single root element (similar to earlier versions of react before Fragments)
+- there's a *props* attribute, similar to react. Note:
+ - treat ur props as immutables. Rely on *data()* and *computed()* instead...
+- component names are usually hyphenated, not camelcased. e.g. `my-component`.
+- the attribute `inline-template` lets you create a component without a "template" section in the definition... because the template will be taken as whatever appears between the opening and closing tags of the component.
+
+# events
+- `$emit(myCustomEvtName)` will emit a custom event. Example use:
+ - Example emitter: `<button @click="$emit('doTheThing')">Do it!</button>`
+ - Example listener: `<MyComponent @doTheThing="foo=false"></MyComponent>`
+
+
 # life cycle
 - mounted()
 
 
 # snippets
 
+# vue-cli
+```
+npm install -g @vue/cli
+vue create my-project
+cd my-project
+npm run serve #for dev
+npm run build #for prod
+```
