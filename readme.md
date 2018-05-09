@@ -55,7 +55,8 @@ export default {
 - note that since components are not bound to an actual instance, the data attribute needs to be a *function* that returns the data obj, to be called later when the component is instantiated.
 - the template must return a single root element (similar to earlier versions of react before Fragments)
 - there's a *props* attribute, similar to react. Note:
- - treat ur props as immutables. Rely on *data()* and *computed()* instead...
+ - treat ur props as immutables. Rely on *data()* and *computed()* instead if you need to modify something...
+ - you don't prefix props, like `this.props.foo`. All props are placed in _this_ scope, so it's `this.foo`. !!
 - component names are usually hyphenated, not camelcased. e.g. `my-component`.
 - the attribute `inline-template` lets you create a component without a "template" section in the definition... because the template will be taken as whatever appears between the opening and closing tags of the component.
 
@@ -63,6 +64,9 @@ export default {
 - `$emit(myCustomEvtName)` will emit a custom event. Example use:
  - Example emitter: `<button @click="$emit('doTheThing')">Do it!</button>`
  - Example listener: `<MyComponent @doTheThing="foo=false"></MyComponent>`
+- we can use $emit‘s 2nd parameter to provide a value:
+ - Example emitter: `@click="$emit('doSomething', withThisObj)"`
+ - Example listener: `@doSomething="foo(withThisObj)"`
 
 
 # life cycle
