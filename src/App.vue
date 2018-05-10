@@ -45,42 +45,6 @@ export default {
 .container {
   padding: 3rem;
 }
-.task {
-  border: 1px solid #eee;
-  padding: 1rem;
-  margin: 0.8rem 0;
-  border-radius: 0.3rem;
-}
-.task-header {
-  display: flex;
-  background-color: #e3eff9;
-  border-radius: 0.3rem;
-  padding: 1rem;
-
-}
-.task-header-title {
-  flex-grow: 2;
-  font-size: 1.75rem;
-}
-.task-measure {
-  font-size: 1.5rem;
-  border-radius: 0.3rem;
-  margin: 0.2rem;
-  background-color: grey;
-}
-.task-body {
-  padding: 1rem;
-}
-/*a, a:hover, a:active, a:link { text-decoration: none; }*/
-.button .icon:first-child:last-child { margin: inherit; } /*bulma fix*/
-a.task-meta-id {
-  color: grey;
-}
-a.task-measure-count, a.task-measure-addcount {
-  color: white;
-  display: inline-block;
-  padding:1rem;
-}
 .curdate, .template-type {
   font-weight: bold;
 }
