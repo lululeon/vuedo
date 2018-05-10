@@ -12,8 +12,10 @@
       </div>
     </header>
     <div class="task-body">
-      <p>Task ID: <span class="task-meta-detail-id" aria-label="task id">{{task.id}}</span></p>
-      <p>metadata / info to go here.</p>
+      <div class="task-meta-cells">
+        <div class="task-meta-cell"><span>Task Id</span><span>{{ task.id }}</span></div>
+        <div class="task-meta-cell"><span>metric</span><span>{{ this.getUomAttr(task.metric.uomId, 'uomShorthand') }}</span></div>
+      </div>
     </div>
     <div class="task-footer buttons">
       <button class="button primary is-warning is-outlined">
@@ -27,6 +29,8 @@
 </template>
 
 <script>
+import uomList from '../data/uom';
+
 export default {
   name: 'Task',
   components: {
@@ -53,6 +57,11 @@ export default {
     },
     incrementCount() {
       this.count += 1;
+    },
+    getUomAttr(id, attr) {
+      if(!uomList[id]) return '';
+      const val = uomList[id][attr];
+      return val || '';
     }
   }
 }
@@ -88,10 +97,26 @@ export default {
   background-color: #fafafa;
 }
 .task-body {
-  padding: 1rem;
+  margin: 0.5rem 0;
 }
-a.task-meta-id {
-  color: grey;
+.task-meta-cells {
+  display:flex;
+}
+.task-meta-cell {
+  text-align: center;
+  width: 100px;
+  margin: 0.15rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #eee;
+  border-radius: 0.3rem;
+}
+.task-meta-cell span {
+    padding: 0.5rem;
+}
+.task-meta-cell>span:first-child {
+  background-color: #f3f3f3;
+  border-radius: 0.2rem 0.2rem 0 0;
 }
 a.task-measure-count, a.task-measure-addcount {
   color: #717171;
