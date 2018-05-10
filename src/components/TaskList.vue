@@ -5,7 +5,7 @@
         <span class="icon">
           <i class="fas fa-plus"></i>
         </span>
-        Add task
+        <span>Add task</span>
       </button>
     </div>
     <InputForm
@@ -13,9 +13,9 @@
       @saveNewTask="saveTask"
       @hideInputForm="hideInputForm" 
       v-if="showInputForm"/>
-    <div>
+    <transition-group name="taskpop" tag="div" class="tasklist">
       <Task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask" ></Task>
-    </div>
+    </transition-group>
     <p>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
     </p>
@@ -36,7 +36,7 @@ export default {
     //in components, you must RETURN the data object
     return {
       tasks: [
-        { id: 1, description: 'Jazz practice', timed:'true', count:2, targetReached: false, 
+        { id: 1, description: 'Jazz practice', count:2, targetReached: false, 
           metric: {
             timeWindow: 'day', //target per day|week|month|quarter|year
             uomId: 'time:hour',
@@ -44,7 +44,7 @@ export default {
             stepSize: 1 // default
           }
         },
-        { id: 2, description: 'Strength training', timed:'false', count:1, targetReached: false,
+        { id: 2, description: 'Strength training', count:1, targetReached: false,
           metric: {
             timeWindow: 'week', //target per day|week|month|quarter|year
             uomId: 'none:count',
@@ -68,7 +68,6 @@ export default {
 
   methods: {
     addTask() {
-      // this.clearInputPanel();
       this.showInputForm = true;
     },
     hideInputForm() {
@@ -77,25 +76,13 @@ export default {
     saveTask(taskToSave) {
       this.tasks.push(taskToSave);
       this.nextId += 1;
-      //this.setBlankTask();
     },
     deleteTask(taskId) {
       let idx = this.tasks.findIndex((task)=>{
         return (task.id == taskId);
       });
       this.tasks.splice(idx, 1);
-    } //,
-    // setBlankTask() {
-    //   this.newtask = {
-    //     id: this.nextId,
-    //     description: '',
-    //     timed: false,
-    //     count: 0,
-    //     targetReached: false
-    //   };
-    //   console.log(" ***** blank task created with id:", this.nextId);
-    //   console.log(" ***", this.newtask);
-    // }
+    }
   },
 
   mounted() {
@@ -103,8 +90,6 @@ export default {
     this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
       return Math.max(nextItem.id, accumulator);
     }, 0);
-    //set up next task
-    //this.setBlankTask();
   },
 
   computed: {
@@ -116,3 +101,30 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.tasklist {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.taskpop-enter-active {
+  animation: pop 0.25s;
+}
+.taskpop-leave-active {
+  animation: pop 0.5s reverse;
+}
+@keyframes pop {
+  0% {
+    background-color: none;
+    transform: scale(0.9) translateY(-5%);
+  }
+  90% {
+    background-color: #fcdd57;
+    transform: scale(1.02);    
+  }
+  100% {
+    background-color: none;
+    transform: scale(1) translateY(0%);
+  }
+}
+</style>
