@@ -1,7 +1,7 @@
 export default {
     // dimensionless metrics
     'none:count': {
-        uomShorthand: 'x',
+        uomShorthand: 'counts',
         uomLabel: 'Counts',
         uomBaseUnit: 'none:count',
         uomMultiplier: 1

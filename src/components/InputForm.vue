@@ -18,8 +18,8 @@
             <div class="field">
               <label class="label">How would you like to measure your activity?</label>
               <div class="select">
-                <select>
-                  <option v-for="uom in uomOptions" :key="uom.value" value="uom.value">{{ uom.label }}</option>
+                <select v-model="newtask.metric.uomId">
+                  <option v-for="uom in uomOptions" :key="uom.value" :value="uom.value">{{ uom.label }}</option>
                 </select>
               </div>
             </div>
@@ -89,6 +89,7 @@ export default {
       this.newtask = {
         id: newNextId || this.nextId, //first time, get from props; thereafter from watched prop changes.
         description: '',
+        metric: { uomId: 'none:count' },
         count: 0,
         targetReached: false
       };
