@@ -23,6 +23,14 @@
                 </select>
               </div>
             </div>
+            <div class="field">
+              <label class="label">What timeframe is appropriate for measuring your progress?</label>
+              <div class="select">
+                <select v-model="newtask.metric.timeframe">
+                  <option v-for="tf in timeframes" :key="tf" :value="tf">{{ tf }}</option>
+                </select>
+              </div>
+            </div>
         </div>
         <div class="card-content level-right">
             <button class="level-item button" @click="$emit('hideInputForm')">
@@ -56,6 +64,7 @@ export default {
   data() {
     return {
       placeholder: "example: practice piano",
+      timeframes: ['daily','weekly','monthly'],
       newtask: {},
       showNotifOKDescription: false,
       showNotifErrDescription: false
@@ -89,7 +98,7 @@ export default {
       this.newtask = {
         id: newNextId || this.nextId, //first time, get from props; thereafter from watched prop changes.
         description: '',
-        metric: { uomId: 'none:count' },
+        metric: { uomId: 'none:count', timeframe: 'daily' },
         count: 0,
         targetReached: false
       };
