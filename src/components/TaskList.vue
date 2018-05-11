@@ -38,7 +38,7 @@ export default {
       tasks: [
         { id: 1, description: 'Jazz practice', count:2, targetReached: false, 
           metric: {
-            timeWindow: 'day', //target per day|week|month|quarter|year
+            timeframe: 'daily', //daily|weekly|monthly
             uomId: 'time:hour',
             measureTarget: 3,
             stepSize: 1 // default
@@ -46,7 +46,7 @@ export default {
         },
         { id: 2, description: 'Strength training', count:1, targetReached: false,
           metric: {
-            timeWindow: 'week', //target per day|week|month|quarter|year
+            timeframe: 'weekly', //daily|weekly|monthly
             uomId: 'none:count',
             measureTarget: 3,
             stepSize: 1 // default

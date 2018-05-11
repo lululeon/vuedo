@@ -13,8 +13,9 @@
     </header>
     <div class="task-body">
       <div class="task-meta-cells">
-        <div class="task-meta-cell"><span>Task Id</span><span>{{ task.id }}</span></div>
+        <div class="task-meta-cell"><span>task id</span><span>{{ task.id }}</span></div>
         <div class="task-meta-cell"><span>metric</span><span>{{ this.getUomAttr(task.metric.uomId, 'uomShorthand') }}</span></div>
+        <div class="task-meta-cell"><span>timeframe</span><span>{{ task.metric.timeframe }}</span></div>
       </div>
     </div>
     <div class="task-footer buttons">
