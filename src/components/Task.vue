@@ -13,8 +13,11 @@
     </header>
     <div class="task-body">
       <div class="task-meta-cells">
-        <div class="task-meta-cell"><span>Task Id</span><span>{{ task.id }}</span></div>
+        <div class="task-meta-cell"><span>id</span><span>{{ task.id }}</span></div>
+        <div class="task-meta-cell"><span>target</span><span>{{ task.metric.measureTarget }}</span></div>
         <div class="task-meta-cell"><span>metric</span><span>{{ this.getUomAttr(task.metric.uomId, 'uomShorthand') }}</span></div>
+        <div class="task-meta-cell"><span>timeframe</span><span>{{ task.metric.timeframe }}</span></div>
+        <div class="task-meta-cell"><span>step size</span><span>{{ task.metric.stepSize }}</span></div>
       </div>
     </div>
     <div class="task-footer buttons">
@@ -76,6 +79,7 @@ export default {
 }
 .task-header {
   display: flex;
+  align-items: center;
   background-color: #f3f3f3;
   border-radius: 0.3rem;
   padding: 1rem;
@@ -125,5 +129,28 @@ a.task-measure-count, a.task-measure-addcount {
 }
 .task-footer .button {
   border-width: 2px;
+}
+
+@media screen and (max-width: 450px) { /*when width gets less than this...*/
+  .task-header {
+    flex-wrap: wrap;
+  }
+  .task-header-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    padding: 0.25rem;
+  }
+  .task-meta-cells {
+    flex-direction: column;
+  }
+  .task-meta-cell {
+    flex-direction: row;
+    width: 100%;
+  }
+  .task-meta-cell span {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
 }
 </style>

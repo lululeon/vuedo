@@ -85,3 +85,11 @@ cd my-project
 npm run serve #for dev
 npm run build #for prod
 ```
+
+# vue instance : properties and methods
+When ready for more indepth understanding:
+- https://vuejs.org/v2/api/#Instance-Properties
+- https://vuejs.org/v2/api/#Instance-Methods-Data
+- https://vuejs.org/v2/api/#Instance-Methods-Events
+- https://vuejs.org/v2/api/#Instance-Methods-Lifecycle
+- https://vuejs.org/v2/api/#Directives
