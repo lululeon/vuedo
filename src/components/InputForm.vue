@@ -26,7 +26,7 @@
               <label class="label">How would you like to measure your activity?</label>
               <div class="select">
                 <select v-model="newtask.metricUomId">
-                  <option v-for="uom in uomOptions" :key="uom.value" :value="uom.value">{{ uom.label }}</option>
+                  <option v-for="(uom, idx) in uomOptions" :key="uom.value" :selected="idx === 1 ? 'selected' : ''" :value="uom.value">{{ uom.label }}</option>
                 </select>
               </div>
             </div>
@@ -39,6 +39,18 @@
                   </span>
               </div>  
               <p class="help is-danger" v-if="showMeasureTargetErr">Do not leave blank - Please enter a target value</p>
+              <p class="help is-info">{{ prompts.measureTarget }}</p>
+            </div>
+            <div class="field">
+              <label class="label">Log progress easily in fixed increments.</label>
+              <div class="control has-icons-right">
+                <input class="input" @focus="showStepSizeErr=false" :class="{'is-danger' : showStepSizeErr}" type="text" v-model="newtask.metricStepSize" />
+                <span class="icon is-small is-right" v-if="showStepSizeErr">
+                <i class="fas fa-exclamation-triangle"></i>
+                </span>
+              </div>  
+              <p class="help is-danger" v-if="showStepSizeErr">Please enter the increment value for logging your progress</p>
+              <p class="help is-info">{{ prompts.stepSize }}</p>
             </div>
         </div>
         <div class="card-content level-right">
@@ -60,6 +72,8 @@
 
 <script>
 import uomList from '../data/uom';
+import timeframesList from '../data/timeframes';
+const defaultUOMId = 'none:count';
 
 export default {
   name: 'InputForm',
@@ -73,10 +87,11 @@ export default {
   data() {
     return {
       placeholder: "example: practice piano",
-      timeframes: ['daily','weekly','monthly'],
+      timeframes: Object.values(timeframesList),
       newtask: {},
       showMeasureTargetErr: false,
-      showDescriptionErr: false
+      showDescriptionErr: false,
+      showStepSizeErr: false
     }
   },
   watch: {
@@ -95,6 +110,12 @@ export default {
         this.showMeasureTargetErr = true;
         return;
       }
+      const stepsz = parseFloat(this.newtask.metricStepSize);
+      if(isNaN(stepsz)) {
+        this.showStepSizeErr = true;
+        return;
+      }
+
       this.$emit('saveNewTask', { 
         id: this.newtask.id,
         description: this.newtask.description,
@@ -102,7 +123,8 @@ export default {
         metric: {
           timeframe: this.newtask.metricTimeframe,
           uomId: this.newtask.metricUomId,
-          measureTarget: target
+          measureTarget: target,
+          stepSize: stepsz
         }
       });
       this.clearInputPanel();
@@ -110,6 +132,7 @@ export default {
     clearInputPanel() {
       this.showDescriptionErr = false;
       this.showMeasureTargetErr = false;
+      this.showStepSizeErr = false;
     },
     deleteTask(taskId) {
       let idx = this.tasks.findIndex((task)=>{
@@ -123,9 +146,10 @@ export default {
         description: '',
         //nested objs don't work well with vue 2way binding
         //metric: { uomId: 'none:count', timeframe: 'daily', measureTarget: 1 },
-        metricTimeframe: 'daily',
-        metricUomId: 'none:count',
+        metricTimeframe: timeframesList.daily,
+        metricUomId: defaultUOMId,
         metricMeasureTarget: 1,
+        metricStepSize: 1,
         count: 0,
         targetReached: false
       };
@@ -141,6 +165,27 @@ export default {
         options.push({ value:k, label:uomList[k].uomLabel });
       });
       return options;
+    },
+    prompts() {
+      const targetAmt = this.newtask.metricMeasureTarget || 1;
+      const stepsz = this.newtask.metricStepSize || 1;
+      const uomId = this.newtask.metricUomId || defaultUOMId;
+      let metricForTarget, metricForSteps = '';
+      const timeframeText = this.newtask.metricTimeframe || timeframesList.daily;
+      if (targetAmt === 1 || targetAmt === '1') {//numeric vals <=> strings in browser form
+        metricForTarget = uomList[uomId].uomSingular;
+      } else {
+        metricForTarget = uomList[uomId].uomLabel;
+      }
+      if (stepsz === 1 || stepsz === '1') {//numeric vals <=> strings in browser form
+        metricForSteps = uomList[uomId].uomSingular;
+      } else {
+        metricForSteps = uomList[uomId].uomLabel;
+      }
+      return ({
+        'measureTarget': `e.g. ${targetAmt} ${metricForTarget} ${timeframeText}`,
+        'stepSize': `e.g. each time you log progress, we'll add ${stepsz} ${metricForSteps} to your progress`
+      });
     }
   },
   mounted() {
