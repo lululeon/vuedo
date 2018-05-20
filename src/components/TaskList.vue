@@ -14,7 +14,7 @@
       @hideInputForm="hideInputForm" 
       v-if="showInputForm"/>
     <transition-group name="taskpop" tag="div" class="tasklist">
-      <Task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask" ></Task>
+      <Task v-for="task in tasks" :key="task.id" :task="task" :executionLog="getExecutionLog(task.id)" :onDelete="deleteTask" ></Task>
     </transition-group>
     <p>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
@@ -38,7 +38,7 @@ export default {
       tasks: [
         { id: 1, description: 'Jazz practice', count:2, targetReached: false, 
           metric: {
-            timeframe: 'daily', //daily|weekly|monthly
+            timeframe: 'tf:daily',
             uomId: 'time:hour',
             measureTarget: 3,
             stepSize: 1 // default
@@ -46,21 +46,34 @@ export default {
         },
         { id: 2, description: 'Strength training', count:1, targetReached: false,
           metric: {
-            timeframe: 'weekly', //daily|weekly|monthly
+            timeframe: 'tf:weekly',
             uomId: 'none:count',
             measureTarget: 3,
             stepSize: 1 // default
           }
+        },
+        { id: 3, description: 'meditation practice', count:0, targetReached: false,
+          metric: {
+            timeframe: 'tf:weekly',
+            uomId: 'time:minute',
+            measureTarget: 60,
+            stepSize: 15 // default
+          }
        }
       ],
-      measures: [
+      goals: [
+        { id: 1, name: 'Learn to be happy in life!'}
+      ],
+      executionLog: [
         { taskId: 1, timestamp:'2018-01-29', value: 2, targetReached: false },
         { taskId: 2, timestamp:'2018-01-29', value: 1, targetReached: false },
         { taskId: 2, timestamp:'2018-01-30', value: 2, targetReached: false },
         { taskId: 1, timestamp:'2018-01-31', value: 4, targetReached: true },
         { taskId: 2, timestamp:'2018-01-31', value: 3, targetReached: true }
       ],
-
+      sentimentLog: [
+        { goalId: 1, timestamp:'2018-01-29T12:00:00', anxiety:4, happiness:5, achieving:true }
+      ],
       nextId: 1,
       showInputForm:false
     }
@@ -82,6 +95,11 @@ export default {
         return (task.id == taskId);
       });
       this.tasks.splice(idx, 1);
+    },
+    getExecutionLog(taskId) {
+      return this.executionLog.filter(execItem => {
+        return (execItem.taskId === taskId);
+      });
     }
   },
 

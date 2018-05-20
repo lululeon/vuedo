@@ -1,5 +1,5 @@
 export default {
-    'daily' : 'Daily',
-    'weekly' : 'Weekly',
-    'monthly' : 'Monthly'
+    'tf:daily' : 'Daily',
+    'tf:weekly' : 'Weekly',
+    'tf:monthly' : 'Monthly'
 };

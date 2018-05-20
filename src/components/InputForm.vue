@@ -146,7 +146,7 @@ export default {
         description: '',
         //nested objs don't work well with vue 2way binding
         //metric: { uomId: 'none:count', timeframe: 'daily', measureTarget: 1 },
-        metricTimeframe: timeframesList.daily,
+        metricTimeframe: timeframesList['tf:daily'],
         metricUomId: defaultUOMId,
         metricMeasureTarget: 1,
         metricStepSize: 1,
@@ -171,7 +171,7 @@ export default {
       const stepsz = this.newtask.metricStepSize || 1;
       const uomId = this.newtask.metricUomId || defaultUOMId;
       let metricForTarget, metricForSteps = '';
-      const timeframeText = this.newtask.metricTimeframe || timeframesList.daily;
+      const timeframeText = this.newtask.metricTimeframe || timeframesList['tf:daily'];
       if (targetAmt === 1 || targetAmt === '1') {//numeric vals <=> strings in browser form
         metricForTarget = uomList[uomId].uomSingular;
       } else {
