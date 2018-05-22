@@ -14,11 +14,9 @@
     <div class="task-body">
       <div class="task-meta-cells">
         <div class="task-meta-cell"><span>id</span><span>{{ task.id }}</span></div>
-        <div class="task-meta-cell"><span>target</span><span>{{ task.metric.measureTarget }}</span></div>
-        <div class="task-meta-cell"><span>metric</span><span>{{ metric }}</span></div>
-        <div class="task-meta-cell"><span>timeframe</span><span>{{ timeframe }}</span></div>
-        <div class="task-meta-cell"><span>step size</span><span>{{ task.metric.stepSize }}</span></div>
-        <div class="task-value-cell"><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
+        <div class="task-meta-cell"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
+        <div class="task-meta-cell"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
+        <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
       </div>
     </div>
     <div class="task-footer buttons">
@@ -86,20 +84,53 @@ export default {
       return mathjs.round(this.value / uomList[this.task.metric.uomId].uomMultiplier, 2);
     },
     metric() {
-      return this.getUomAttr(this.task.metric.uomId, 'uomShorthand')
+      return this.getUomAttr(this.task.metric.uomId, 'uomShorthand');
+    },
+    stepSizeMetricLabel() {
+      const value = this.task.metric.stepSize;
+      if ((value === 1) || (value === '1')) {
+        return this.getUomAttr(this.task.metric.uomId, 'uomSingular');
+      } else {
+        return this.getUomAttr(this.task.metric.uomId, 'uomLabel');
+      }
     },
     timeframe() {
-      return timeframes[this.task.metric.timeframe];
+      return timeframes[this.task.metric.timeframe].freqLabel;
     },
     thisTimeframeText() {
-      const tf = timeframes[this.task.metric.timeframe];
-      if(tf === timeframes['tf:daily']) {
-        return 'today';
-      } else if(tf === timeframes['tf:weekly']) {
-        return 'this week';
+      return timeframes[this.task.metric.timeframe].immediacyLabel;
+    },
+    runningTotalStyling() {
+      const rt = this.runningTotal; //display units, not raw units.
+      const target = this.task.metric.measureTarget; //display units, not raw units.
+      if(rt > 0) {
+        if(rt < target) {
+          return 'progressing';
+        }
+        return 'achieving';
       }
-      return 'this month';
-    }
+      return '';
+    }//,
+    // isProgressing() {
+    //   const rt = this.runningTotal;
+    //   const target = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier;
+    //   console.log('isProgressing : ', this.task.description, 'rt', rt, 'target', target);
+    //   if(rt > 0 && rt < target) {
+    //     //progressing
+    //     return true;
+    //   }
+    //   return false;
+    // },
+    // isAchieving() {
+    //   const rt = this.runningTotal;
+    //   const target = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier;
+    //   console.log('isAchieving : ', this.task.description, 'rt', rt, 'target', target);
+    //   if(rt > 0 && rt >= target) {
+    //     //achieving
+    //     return true;
+    //   }
+    //   return false;
+    // }
   },
 
   mounted() {
@@ -167,13 +198,26 @@ export default {
 .task-value-cell {
   width: 200px;
   color: #fff;
-  background-color: #209cee;
+  background-color: #9e9e9e;
+}
+.task-value-cell.achieving {
+  background-color: #8bc34a;
+}
+.task-value-cell.progressing {
+  background-color: #dca500;
+}
+.task-value-cell.behind { /* not used yet */
+  background-color: #f44336;
 }
 .task-meta-cell span, .task-value-cell span {
     padding: 0.5rem;
 }
 .task-meta-cell>span:first-child {
   background-color: #f3f3f3;
+  border-radius: 0.2rem 0.2rem 0 0;
+}
+.task-value-cell>span:first-child {
+  background-color: #3e3e3e;
   border-radius: 0.2rem 0.2rem 0 0;
 }
 a.task-measure-count, a.task-measure-addcount {
