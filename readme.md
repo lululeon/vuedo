@@ -118,6 +118,7 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
  - you don't prefix props, like `this.props.foo`. All props are placed in _this_ scope, so it's `this.foo`. !!
 - component names are usually hyphenated, not camelcased. e.g. `my-component`.
 - the attribute `inline-template` lets you create a component without a "template" section in the definition... because the template will be taken as whatever appears between the opening and closing tags of the component.
+- **component lifecycle** see: [this link](https://scotch.io/tutorials/demystifying-vue-lifecycle-methods)
 
 # component styling
 - the style tag can be scoped: When a `<style>` tag has the scoped attribute, (i.e. `<style scoped>...</style>`, its CSS will apply to elements of the current component only. This is driven by postcss, under the hood.

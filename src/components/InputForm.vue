@@ -207,6 +207,6 @@ export default {
 
 <style scoped>
 .taskform {
-    background-color: #fcdd57;
+    background-color: #f4f3f3;
 }
 </style>
