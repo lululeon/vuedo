@@ -14,7 +14,12 @@
       @hideInputForm="hideInputForm" 
       v-if="showInputForm"/>
     <transition-group name="taskpop" tag="div" class="tasklist">
-      <Task v-for="task in tasks" :key="task.id" :task="task" :onDelete="deleteTask" ></Task>
+      <Task v-for="task in tasks" 
+        :key="task.id" 
+        :task="task" 
+        :executionLog="getExecutionLog(task.id)" 
+        :currentTimeframe="currentTimeframes[task.metric.timeframe]"
+        :onDelete="deleteTask" />
     </transition-group>
     <p>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
@@ -23,8 +28,10 @@
 </template>
 
 <script>
-import Task from './Task.vue'
-import InputForm from './InputForm.vue'
+import moment from 'moment';
+import Task from './Task.vue';
+import InputForm from './InputForm.vue';
+import timeframes from '../data/timeframes';
 
 export default {
   name: 'TaskList',
@@ -36,33 +43,47 @@ export default {
     //in components, you must RETURN the data object
     return {
       tasks: [
-        { id: 1, description: 'Jazz practice', count:2, targetReached: false, 
+        { id: 1, description: 'Jazz practice', targetReached: false, 
           metric: {
-            timeframe: 'daily', //daily|weekly|monthly
+            timeframe: 'tf:daily',
             uomId: 'time:hour',
             measureTarget: 3,
             stepSize: 1 // default
           }
         },
-        { id: 2, description: 'Strength training', count:1, targetReached: false,
+        { id: 2, description: 'Strength training at gym', targetReached: false,
           metric: {
-            timeframe: 'weekly', //daily|weekly|monthly
+            timeframe: 'tf:monthly',
             uomId: 'none:count',
-            measureTarget: 3,
+            measureTarget: 8,
             stepSize: 1 // default
+          }
+        },
+        { id: 3, description: 'meditation practice', targetReached: false,
+          metric: {
+            timeframe: 'tf:weekly',
+            uomId: 'time:minute',
+            measureTarget: 60,
+            stepSize: 15 // default
           }
        }
       ],
-      measures: [
-        { taskId: 1, timestamp:'2018-01-29', value: 2, targetReached: false },
-        { taskId: 2, timestamp:'2018-01-29', value: 1, targetReached: false },
-        { taskId: 2, timestamp:'2018-01-30', value: 2, targetReached: false },
-        { taskId: 1, timestamp:'2018-01-31', value: 4, targetReached: true },
-        { taskId: 2, timestamp:'2018-01-31', value: 3, targetReached: true }
+      goals: [
+        { id: 1, name: 'Learn to be happy in life!'}
       ],
-
+      executionLog: [
+        { taskId: 1, timestamp:'2018-05-19T14:00:03', value: 2, targetReached: false },
+        { taskId: 2, timestamp:'2018-05-19T10:00:05', value: 1, targetReached: false },
+        { taskId: 2, timestamp:'2018-05-20T17:37:02', value: 2, targetReached: false },
+        { taskId: 1, timestamp:'2018-05-21T18:11:12', value: 4, targetReached: true },
+        { taskId: 2, timestamp:'2018-05-22T09:02:00', value: 3, targetReached: true }
+      ],
+      sentimentLog: [
+        { goalId: 1, timestamp:'2018-01-29T12:00:00', anxiety:4, happiness:5, achieving:true }
+      ],
       nextId: 1,
-      showInputForm:false
+      showInputForm:false,
+      currentTimeframes: {}
     }
   },
 
@@ -82,7 +103,31 @@ export default {
         return (task.id == taskId);
       });
       this.tasks.splice(idx, 1);
+    },
+    getExecutionLog(taskId) {
+      return this.executionLog.filter(execItem => {
+        return (execItem.taskId === taskId);
+      });
+    },
+    updateTimeframes() {
+      const dayStart = moment().startOf('day');
+      const dayEnd = moment().endOf('day');
+      const weekStart = moment().startOf('isoWeek'); //ISO standard first weekday is Monday
+      const weekEnd = moment().endOf('isoWeek');
+      const monthStart = moment().startOf('month');
+      const monthEnd = moment().endOf('month');
+      timeframes['tf:daily'].start = dayStart;
+      timeframes['tf:daily'].end = dayEnd;
+      timeframes['tf:weekly'].start = weekStart;
+      timeframes['tf:weekly'].end = weekEnd;
+      timeframes['tf:monthly'].start = monthStart;
+      timeframes['tf:monthly'].end = monthEnd;
+      this.currentTimeframes = timeframes;     
     }
+  },
+
+  created() {
+    this.updateTimeframes();
   },
 
   mounted() {
@@ -90,13 +135,21 @@ export default {
     this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
       return Math.max(nextItem.id, accumulator);
     }, 0);
+
+    //set up the clock!
+    //setInterval(this.checkTime, 3000); //every 3 secs
   },
 
   computed: {
     downloadDataset() {
-      var buffer = "data:text/json;charset=utf-8," + 
-        encodeURIComponent(JSON.stringify(this.tasks).split(',').join(',\r\n'));
-        return buffer;
+      const dataset = {
+        tasks: this.tasks,
+        goals: this.goals,
+        executionLog: this.executionLog,
+        sentimentLog: this.sentimentLog
+      };
+      var buffer = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataset).split(',').join(',\r\n'));
+      return buffer;
     }
   }
 }

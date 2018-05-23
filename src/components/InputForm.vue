@@ -6,10 +6,10 @@
               <div class="control has-icons-left has-icons-right">
                   <input class="input" @focus="showDescriptionErr=false" :class="{'is-danger' : showDescriptionErr}" type="text" :placeholder="placeholder" v-model="newtask.description" />
                   <span class="icon is-small is-left">
-                  <i class="fas fa-list-alt"></i>
+                    <font-awesome-icon :icon="['fas', 'list-alt']" />
                   </span>
                   <span class="icon is-small is-right" v-if="showDescriptionErr">
-                  <i class="fas fa-exclamation-triangle"></i>
+                    <font-awesome-icon :icon="['fas', 'exclamation-triangle']" />
                   </span>
               </div>  
               <p class="help is-danger" v-if="showDescriptionErr">Do not leave blank - please enter a task description</p>
@@ -18,7 +18,7 @@
               <label class="label">What timeframe is appropriate for measuring your progress?</label>
               <div class="select">
                 <select v-model="newtask.metricTimeframe">
-                  <option v-for="tf in timeframes" :key="tf" :value="tf">{{ tf }}</option>
+                  <option v-for="(tf, idx) in timeframeOptions" :key="tf.value" :selected="idx === 1 ? 'selected' : ''" :value="tf.value">{{ tf.label }}</option>
                 </select>
               </div>
             </div>
@@ -35,7 +35,7 @@
               <div class="control has-icons-right">
                   <input class="input" @focus="showMeasureTargetErr=false" :class="{'is-danger' : showMeasureTargetErr}" type="text" v-model="newtask.metricMeasureTarget" />
                   <span class="icon is-small is-right" v-if="showMeasureTargetErr">
-                  <i class="fas fa-exclamation-triangle"></i>
+                    <font-awesome-icon :icon="['fas', 'exclamation-triangle']" />
                   </span>
               </div>  
               <p class="help is-danger" v-if="showMeasureTargetErr">Do not leave blank - Please enter a target value</p>
@@ -46,7 +46,7 @@
               <div class="control has-icons-right">
                 <input class="input" @focus="showStepSizeErr=false" :class="{'is-danger' : showStepSizeErr}" type="text" v-model="newtask.metricStepSize" />
                 <span class="icon is-small is-right" v-if="showStepSizeErr">
-                <i class="fas fa-exclamation-triangle"></i>
+                  <font-awesome-icon :icon="['fas', 'exclamation-triangle']" />
                 </span>
               </div>  
               <p class="help is-danger" v-if="showStepSizeErr">Please enter the increment value for logging your progress</p>
@@ -56,13 +56,13 @@
         <div class="card-content level-right">
             <button class="level-item button" @click="$emit('hideInputForm')">
                 <span class="icon">
-                <i class="fas fa-ban"></i>
+                  <font-awesome-icon :icon="['fas', 'ban']" />
                 </span>
                 <span>Cancel task addition</span>
             </button>
             <button class="level-item button has-background-info" @click="saveTask">
                 <span class="icon">
-                <i class="fas fa-save"></i>
+                  <font-awesome-icon :icon="['fas', 'save']" />
                 </span>
                 <span>Save</span>
             </button>
@@ -74,6 +74,7 @@
 import uomList from '../data/uom';
 import timeframesList from '../data/timeframes';
 const defaultUOMId = 'none:count';
+const defaultTimeFrameCode = 'tf:daily';
 
 export default {
   name: 'InputForm',
@@ -87,7 +88,6 @@ export default {
   data() {
     return {
       placeholder: "example: practice piano",
-      timeframes: Object.values(timeframesList),
       newtask: {},
       showMeasureTargetErr: false,
       showDescriptionErr: false,
@@ -146,7 +146,7 @@ export default {
         description: '',
         //nested objs don't work well with vue 2way binding
         //metric: { uomId: 'none:count', timeframe: 'daily', measureTarget: 1 },
-        metricTimeframe: timeframesList.daily,
+        metricTimeframe: defaultTimeFrameCode, //daily
         metricUomId: defaultUOMId,
         metricMeasureTarget: 1,
         metricStepSize: 1,
@@ -166,12 +166,23 @@ export default {
       });
       return options;
     },
+    timeframeOptions() {
+      const options = [];
+      Object.keys(timeframesList).forEach((k) => {
+        options.push({ value:k, label:timeframesList[k].name });
+      });
+      return options;
+    },
     prompts() {
       const targetAmt = this.newtask.metricMeasureTarget || 1;
       const stepsz = this.newtask.metricStepSize || 1;
       const uomId = this.newtask.metricUomId || defaultUOMId;
       let metricForTarget, metricForSteps = '';
-      const timeframeText = this.newtask.metricTimeframe || timeframesList.daily;
+      let timeframeText = timeframesList[defaultTimeFrameCode].name;
+      if(this.newtask.metricTimeframe) {
+        timeframeText = timeframesList[this.newtask.metricTimeframe].name || timeframeText;
+      }
+
       if (targetAmt === 1 || targetAmt === '1') {//numeric vals <=> strings in browser form
         metricForTarget = uomList[uomId].uomSingular;
       } else {
@@ -196,6 +207,6 @@ export default {
 
 <style scoped>
 .taskform {
-    background-color: #fcdd57;
+    background-color: #f4f3f3;
 }
 </style>
