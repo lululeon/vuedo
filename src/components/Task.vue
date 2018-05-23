@@ -4,17 +4,17 @@
       <span class="task-header-title">
         {{task.description}}
       </span>
-      <div class="task-measure stats" :class="{'measure-positive' : count > 0}">
-          <a href="#" class="task-measure-count" aria-label="current count">{{ count }}</a>
+      <div class="task-measure counter">
+        <a @click="decrement" aria-label="decrement count">-</a>
       </div>
       <div class="task-measure counter">
-        <a class="task-measure-addcount" @click="increment" aria-label="increment count">+</a>
+        <a @click="increment" aria-label="increment count">+</a>
       </div>
     </header>
     <div class="task-body">
       <div class="task-meta-cells">
-        <div class="task-meta-cell"><span>id</span><span>{{ task.id }}</span></div>
-        <div class="task-meta-cell"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
+        <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
+        <div class="task-meta-cell large"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
         <div class="task-meta-cell"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
         <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
       </div>
@@ -31,9 +31,9 @@
 </template>
 
 <script>
-import uomList from '../data/uom';
 import mathjs from 'mathjs';
-import timeframes from '../data/timeframes';
+import moment from 'moment';
+import uomList from '../data/uom';
 
 export default {
   name: 'Task',
@@ -41,20 +41,26 @@ export default {
   },
   props: {
     task: {
-      type: Object
+      type: Object,
+      required: true
+    },
+    currentTimeframe: {
+      type: Object,
+      required: true
     },
     executionLog: {
       type: Array
     },
     onDelete: {
-      type: Function
+      type: Function,
+      required: true
     }
   },
 
   data() {
     return {
-      count: this.task.count || 0,
-      value: 0
+      value: 0,
+      filteredLogs: []
     };
   },
 
@@ -65,12 +71,30 @@ export default {
     },
     increment() {
       // ----- { taskId: 1, timestamp:'yyyy-mm-ddThh:mm:ss', value: 2, targetReached: false } ----
-      // timestamp
-      // count
-      this.count += 1;
-      // raw value to be stored: value = stepSize x metric.uomMultiplier
-      this.value += this.task.metric.stepSize * uomList[this.task.metric.uomId].uomMultiplier;
-      // targetReached
+      const taskId = this.task.id;
+      const timestamp = moment().format();
+      const value = this.task.metric.stepSize * uomList[this.task.metric.uomId].uomMultiplier; //stepSize x metric.uomMultiplier
+      const targetReached = (value >= this.task.measureTarget) ? true : false;
+      this.executionLog.unshift({ taskId, timestamp, value, targetReached });
+      this.updateAnalytics();
+    },
+    decrement() {
+      if(this.runningTotal === 0) {
+        return;
+      }
+      this.executionLog.shift();
+      this.updateAnalytics();
+    },
+    updateAnalytics() {
+      //get logs relevant to current timeframe only
+      this.filteredLogs = this.executionLog.filter(execItem => {
+        return moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+      });
+
+      //calculate initial progress value relative to current timeframe
+      this.value = this.filteredLogs.reduce((accumulator, nextItem) => {
+        return (accumulator + nextItem.value);
+      }, 0);
     },
     getUomAttr(id, attr) {
       if(!uomList[id]) return '';
@@ -95,10 +119,10 @@ export default {
       }
     },
     timeframe() {
-      return timeframes[this.task.metric.timeframe].freqLabel;
+      return this.currentTimeframe.freqLabel;
     },
     thisTimeframeText() {
-      return timeframes[this.task.metric.timeframe].immediacyLabel;
+      return this.currentTimeframe.immediacyLabel;
     },
     runningTotalStyling() {
       const rt = this.runningTotal; //display units, not raw units.
@@ -110,27 +134,7 @@ export default {
         return 'achieving';
       }
       return '';
-    }//,
-    // isProgressing() {
-    //   const rt = this.runningTotal;
-    //   const target = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier;
-    //   console.log('isProgressing : ', this.task.description, 'rt', rt, 'target', target);
-    //   if(rt > 0 && rt < target) {
-    //     //progressing
-    //     return true;
-    //   }
-    //   return false;
-    // },
-    // isAchieving() {
-    //   const rt = this.runningTotal;
-    //   const target = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier;
-    //   console.log('isAchieving : ', this.task.description, 'rt', rt, 'target', target);
-    //   if(rt > 0 && rt >= target) {
-    //     //achieving
-    //     return true;
-    //   }
-    //   return false;
-    // }
+    }
   },
 
   mounted() {
@@ -145,7 +149,8 @@ export default {
         return 1;
       });
     }
-    this.value = (this.executionLog[0]) ? this.executionLog[0].value : 0;
+
+    this.updateAnalytics();
   }
 }
 </script>
@@ -174,12 +179,6 @@ export default {
   margin: 0.2rem;
   background-color: #fff;
 }
-.task-measure.stats {
-  background-color: #dee7ec;
-}
-.task-measure.stats.measure-positive {
-  background-color: #fafafa;
-}
 .task-body {
   margin: 0.5rem 0;
 }
@@ -194,6 +193,12 @@ export default {
   flex-direction: column;
   border: 1px solid #eee;
   border-radius: 0.3rem;
+}
+.task-meta-cell.small {
+  width: 50px;
+}
+.task-meta-cell.large {
+  width: 150px;
 }
 .task-value-cell {
   width: 200px;
@@ -220,10 +225,11 @@ export default {
   background-color: #3e3e3e;
   border-radius: 0.2rem 0.2rem 0 0;
 }
-a.task-measure-count, a.task-measure-addcount {
+.task-measure.counter>a {
   color: #717171;
   display: inline-block;
   padding:1rem;
+  font-family: monospace;
 }
 .task-footer .button {
   border-width: 2px;
@@ -242,13 +248,17 @@ a.task-measure-count, a.task-measure-addcount {
   .task-meta-cells {
     flex-direction: column;
   }
-  .task-meta-cell, .task-value-cell {
+  .task-meta-cell, .task-meta-cell.small, .task-meta-cell.large,
+  .task-value-cell {
     flex-direction: row;
     width: 100%;
   }
   .task-meta-cell span, .task-value-cell span {
     flex-basis: 0;
     flex-grow: 1;
+  }
+  .task-meta-cell>span:first-child, .task-value-cell>span:first-child {
+    border-radius: 0.2rem 0 0 0.2rem;
   }
 }
 </style>
