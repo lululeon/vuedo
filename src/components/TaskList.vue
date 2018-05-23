@@ -3,7 +3,7 @@
     <div class="level">
       <button class="button" v-show="!showInputForm" @click="addTask">
         <span class="icon">
-          <i class="fas fa-plus"></i>
+          <font-awesome-icon :icon="['fas', 'plus']" />
         </span>
         <span>Add task</span>
       </button>
@@ -29,6 +29,7 @@
 
 <script>
 import moment from 'moment';
+import jsonbeautify from 'json-beautify';
 import Task from './Task.vue';
 import InputForm from './InputForm.vue';
 import timeframes from '../data/timeframes';
@@ -148,8 +149,11 @@ export default {
         executionLog: this.executionLog,
         sentimentLog: this.sentimentLog
       };
-      var buffer = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataset).split(',').join(',\r\n'));
-      return buffer;
+
+      // let jsonstr = JSON.stringify(dataset).split(',').join(',\r\n');
+      const jsonstr = jsonbeautify(dataset, null, 2, 100);
+      const responseBuffer = "data:text/json;charset=utf-8," + encodeURIComponent(jsonstr);
+      return responseBuffer;
     }
   }
 }

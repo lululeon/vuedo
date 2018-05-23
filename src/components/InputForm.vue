@@ -55,12 +55,9 @@
         </div>
         <div class="card-content level-right">
             <button class="level-item button" @click="$emit('hideInputForm')">
-                <span class="icon">
-                  <font-awesome-icon :icon="['fas', 'ban']" />
-                </span>
                 <span>Cancel task addition</span>
             </button>
-            <button class="level-item button has-background-info" @click="saveTask">
+            <button class="level-item button is-info" @click="saveTask">
                 <span class="icon">
                   <font-awesome-icon :icon="['fas', 'save']" />
                 </span>
