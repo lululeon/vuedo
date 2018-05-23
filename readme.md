@@ -130,7 +130,7 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
   - add the following to your codebase per [instructions at fontawesome... make sure to scroll down to "vue.js example"](https://fontawesome.com/how-to-use/use-with-node-js)
     - in **app.js**:
     ```js
-    //WARNING!! do not use require()'s to import! Everything gets hosed... known issue at time of writing.
+    //WARNING!! do not use require()'s to import fawesome! Everything gets hosed... known issue at time of writing.
     import Vue from 'vue'
     import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
     import fontawesome from '@fortawesome/fontawesome'
@@ -148,11 +148,10 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
  - Example emitter: `@click="$emit('doSomething', withThisObj)"`
  - Example listener: `@doSomething="foo(withThisObj)"`
 - **A SHARED EVENT BUS:** while the above methods are great for parent-child signals, for app-wide and inter-sibling component messaging, you can create a bare vue() instance, which is basically an object totally decoupled from the DOM _but which has vue's awesome event bus_ baked in... and you can just import that instance whenever you want to communicate with everything. example impl:
-  - **method 1**: attach to `window` for instant globalness:
+  - **method 1**: attach to `window` for instant globalness
     - `window.Event = new vue();`
-    - ... `Event.$emit(...)`, `Event.$on(...)` ...
-  - **method 2**: create a shared lib:
-    - 
+    - `Event.$emit(...)`, and `Event.$on(...)`
+  - **method 2**: create a shared lib
     ```
     import Vue from 'vue';
     export const EventBus = new Vue();
@@ -161,9 +160,12 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
     - `import { EventBus } from './event-bus.js';`
     - ... `EventBus.$emit(...)` ...
 
-# life cycle
+# Key life cycle hooks
+These are just the most handy ones. for full list, see [this link](https://vuejs.org/v2/api/#Options-Lifecycle-Hooks)
+- beforeCreate()
+- created()
 - mounted()
-
+- beforeUpdate()
 
 # snippets
 
