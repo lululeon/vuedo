@@ -13,19 +13,51 @@
 </template>
 
 <script>
-// >>> fontawesome setup for vue.js
 import Vue from 'vue'
+import moment from 'moment';
+
+// >>> fontawesome setup for vue.js
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import fontawesome from '@fortawesome/fontawesome'
 import solid from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(solid) // Use any icon from the Solid style
 Vue.component('font-awesome-icon', FontAwesomeIcon) // Use the icon component anywhere in the app
 // <<<
-import moment from 'moment';
+
+// >>> vuex
+import Vuex from 'vuex';
+Vue.use(Vuex);
+const store = new Vuex.Store({
+  state: {
+    goals: [],
+    tasks: [],
+    executionLog: [],
+    sentimentLog: []
+  },
+  mutations: {
+    // increment (state) {
+    //   state.count++
+    // }
+    initialize (state, initPayload) {
+      //cannot mutate root obj; breaks reactivity... so doing properties one by one...
+      state.goals = initPayload.goals;
+      state.tasks = initPayload.tasks;
+      state.executionLog = initPayload.executionLog;
+      state.sentimentLog = initPayload.sentimentLog;
+    }
+  },
+  getters: {
+    tasks (state) {
+      return state.tasks;
+    }
+  }
+});
+// <<<
 import TaskList from './components/TaskList.vue';
 
 export default {
   name: 'app',
+  store,
   components: {
     TaskList
   },

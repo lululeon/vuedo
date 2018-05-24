@@ -14,7 +14,7 @@
   })
   ```
 
-# vue component structure
+# vue object structure
 ```js
 {
   el,   //root dom element
@@ -71,6 +71,7 @@ Inline templates are used when you need small fragments of 'reactivity' (binding
     </div>
   </widget>
   ```
+  There are **LOTS OF OTHER WAYS** of [creating vue templates](https://medium.com/js-dojo/7-ways-to-define-a-component-template-in-vuejs-c04e0c72900d).
 
 # vue directives
 - v-model (two-way binding)
@@ -94,7 +95,7 @@ Inline templates are used when you need small fragments of 'reactivity' (binding
 ## .vue files and vue-loader
 Thanks to the **vue-loader** module, you can aggregate all the aspects of a vue component / app into a .vue file...
 
-```
+```html
 <template>
   ...
 </template>
@@ -105,7 +106,9 @@ export default {
 }
 </script>
 
-<style>...</style>
+<style>
+...
+</style>
 ```
 **vue-loader** basically turns the above items in the .vue file format into a regular javascript module.
 With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get the above code snippets inserted for you.
@@ -130,7 +133,7 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
   - add the following to your codebase per [instructions at fontawesome... make sure to scroll down to "vue.js example"](https://fontawesome.com/how-to-use/use-with-node-js)
     - in **app.js**:
     ```js
-    //WARNING!! do not use require()'s to import fawesome! Everything gets hosed... known issue at time of writing.
+    /*WARNING!! do not use require()'s to import fawesome! Everything gets hosed... known issue at time of writing.*/
     import Vue from 'vue'
     import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
     import fontawesome from '@fortawesome/fontawesome'
@@ -152,7 +155,7 @@ With **vetur** installed, you can do `ctrl+space,t`, `ctrl+space,s` etc to get t
     - `window.Event = new vue();`
     - `Event.$emit(...)`, and `Event.$on(...)`
   - **method 2**: create a shared lib
-    ```
+    ```js
     import Vue from 'vue';
     export const EventBus = new Vue();
     ```
@@ -184,10 +187,78 @@ Now, it is entirely abstracted away. To make modifications, you modify the [vue.
 2-way binding to deeply nested attributes in the 'data' object... basically doesn't work.
 For that you will need **deep watchers**. See [here](https://stackoverflow.com/questions/42133894/vue-js-how-to-properly-watch-for-nested-properties) and [here](https://vuejs.org/v2/api/#watch)
 
-# vue instance : properties and methods
+# Accessing the DOM with $refs
+instead of faffing about with jquery etc, you can use the vue [$refs object](https://codingexplained.com/coding/front-end/vue-js/accessing-dom-refs).
+
+- In `<template>` block, add a `ref` attribute to your target element, eg `<button ref="foo" .../>`
+- In `<script>` block, you can access the ACTUAL DOM element that has this ref, e.g. `this.$refs.foo.setInnerText = "blah"`
+- Note: if element is bound to data model in vue instance, changes to the model will override any direct changes you've made via $refs. So it's mostly only good for readonly inspection of elements.
+
+# further info
 When ready for more indepth understanding:
 - https://vuejs.org/v2/api/#Instance-Properties
 - https://vuejs.org/v2/api/#Instance-Methods-Data
 - https://vuejs.org/v2/api/#Instance-Methods-Events
 - https://vuejs.org/v2/api/#Instance-Methods-Lifecycle
 - https://vuejs.org/v2/api/#Directives
+
+# vuex
+vuex is to vue as redux is to react. it is a **SINGLETON, GLOBAL** object.
+- `npm install vuex --save`
+- `npm install es6-promise --save` //crossbrowser polyfill for es6 promises (think stuff babel does for u in reactland)
+- with es6 modules, u must use the `.use()` method to load vuex:
+  - ## setup
+  ```js
+  import Vue from 'vue'
+  import Vuex from 'vuex'
+  Vue.use(Vuex)
+  ```
+  - ## structure
+  ```js
+  const store = new Vuex.Store({
+    state: {
+      count: 0,
+      price: 3
+    },
+    mutations: {
+      increment (state) {
+        state.count++
+      }
+    }
+  })
+  ```
+  - concept of _"commiting mutations"_ ensures that state changes are deterministic and can fwd/backwd traversed (time-travel debugging). To wit, mutations in vuex **MUST BE SYNCHRONOUS** ops.
+  There's a parallel universe for async stuff:
+    - "mutation" => "action"
+    - `this.$store.commit` =>  `this.$store.dispatch`
+
+  - ## wiring
+  ```js
+  //MUTATE store value: e.g. in component method
+  store.commit('increment')
+
+  //ACCESS store value: e.g. in computed property
+  return (store.state.count * store.state.price)
+  ```
+  - NOTE:  In order to avoid importing the global singleton store all over the place, 'store' can be a Vue property (just like data, methods, etc). This is what the line `Vue.use(Vuex)` actually facilitates. Once the root app contains a store, all child components thereafter can access it via `this.$store`.
+
+  - ## mutations
+    - For mutating *objects* within the store state, be careful to do either:
+    - `Vue.set(obj, 'newProp', 123)`, OR
+    - `state.obj = { ...state.obj, newProp: 123 }` 
+
+  - ## Map* functions
+  - Basically simplifies wiring of (especially, but not exclusively) samely-named elements:
+  ```js
+  import { mapState } from 'vuex'
+  ...
+  computed: {
+    ...mapState(['user', 'age']), //spread op takes all props mapState() stubs out for you, then:
+    myOwnComputedProp() { // other regular computeds...
+      return whatever
+    }
+  }
+  ```
+  - also exist MapGetters, MapMutations, MapActions
+  - ## Getters
+  Basically like computed properties, but at the store level. see more [here](https://vuex.vuejs.org/getters.html).
