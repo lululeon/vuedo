@@ -1,12 +1,28 @@
 <template>
   <div>
     <div class="level">
-      <button class="button" v-show="!showInputForm" @click="addTask">
-        <span class="icon">
-          <i class="fas fa-plus"></i>
-        </span>
-        <span>Add task</span>
-      </button>
+      <div class="level-left">
+        <button class="button level-item is-info" @click="loadTasks">
+          <span class="icon">
+            <font-awesome-icon :icon="['fas', 'file']" />
+          </span>
+          <span>Upload your own tasks!</span>
+        </button>
+        <button class="button level-item is-primary" @click="addTask">
+          <span class="icon">
+            <font-awesome-icon :icon="['fas', 'plus']" />
+          </span>
+          <span>Add task</span>
+        </button>
+        <a id="downloadlink" download="vuedo.json" :href="downloadDataset">
+          <button class="button level-item is-warning">
+            <span class="icon">
+              <font-awesome-icon :icon="['fas', 'download']" />
+            </span>
+            <span>Download your data</span>
+          </button>
+        </a>
+      </div>
     </div>
     <InputForm
       :nextId="nextId" 
@@ -16,73 +32,39 @@
     <transition-group name="taskpop" tag="div" class="tasklist">
       <Task v-for="task in tasks" 
         :key="task.id" 
-        :task="task" 
-        :executionLog="getExecutionLog(task.id)" 
+        :task="task"
         :currentTimeframe="currentTimeframes[task.metric.timeframe]"
         :onDelete="deleteTask" />
     </transition-group>
-    <p>
-      <a id="downloadlink" download="vuedo.json" :href="downloadDataset">Save your vuedo list</a>.
-    </p>
+    <UploadWidget 
+      v-if="showUploadWidget"
+      @hideUploadWidget="hideUploadWidget"
+      @uploadReady="populateDataStore" />
   </div>
 </template>
 
 <script>
 import moment from 'moment';
+import jsonbeautify from 'json-beautify';
+import { mapState } from 'vuex';
 import Task from './Task.vue';
-import InputForm from './InputForm.vue';
+import InputForm from './InputForm';
+import UploadWidget from './UploadWidget';
 import timeframes from '../data/timeframes';
 
 export default {
   name: 'TaskList',
   components: {
       Task,
-      InputForm
+      InputForm,
+      UploadWidget
   },
   data() {
     //in components, you must RETURN the data object
     return {
-      tasks: [
-        { id: 1, description: 'Jazz practice', targetReached: false, 
-          metric: {
-            timeframe: 'tf:daily',
-            uomId: 'time:hour',
-            measureTarget: 3,
-            stepSize: 1 // default
-          }
-        },
-        { id: 2, description: 'Strength training at gym', targetReached: false,
-          metric: {
-            timeframe: 'tf:monthly',
-            uomId: 'none:count',
-            measureTarget: 8,
-            stepSize: 1 // default
-          }
-        },
-        { id: 3, description: 'meditation practice', targetReached: false,
-          metric: {
-            timeframe: 'tf:weekly',
-            uomId: 'time:minute',
-            measureTarget: 60,
-            stepSize: 15 // default
-          }
-       }
-      ],
-      goals: [
-        { id: 1, name: 'Learn to be happy in life!'}
-      ],
-      executionLog: [
-        { taskId: 1, timestamp:'2018-05-19T14:00:03', value: 2, targetReached: false },
-        { taskId: 2, timestamp:'2018-05-19T10:00:05', value: 1, targetReached: false },
-        { taskId: 2, timestamp:'2018-05-20T17:37:02', value: 2, targetReached: false },
-        { taskId: 1, timestamp:'2018-05-21T18:11:12', value: 4, targetReached: true },
-        { taskId: 2, timestamp:'2018-05-22T09:02:00', value: 3, targetReached: true }
-      ],
-      sentimentLog: [
-        { goalId: 1, timestamp:'2018-01-29T12:00:00', anxiety:4, happiness:5, achieving:true }
-      ],
       nextId: 1,
       showInputForm:false,
+      showUploadWidget:false,
       currentTimeframes: {}
     }
   },
@@ -91,8 +73,14 @@ export default {
     addTask() {
       this.showInputForm = true;
     },
+    loadTasks() {
+      this.showUploadWidget = true;
+    },
     hideInputForm() {
       this.showInputForm = false;
+    },
+    hideUploadWidget() {
+      this.showUploadWidget = false;
     },
     saveTask(taskToSave) {
       this.tasks.push(taskToSave);
@@ -103,11 +91,6 @@ export default {
         return (task.id == taskId);
       });
       this.tasks.splice(idx, 1);
-    },
-    getExecutionLog(taskId) {
-      return this.executionLog.filter(execItem => {
-        return (execItem.taskId === taskId);
-      });
     },
     updateTimeframes() {
       const dayStart = moment().startOf('day');
@@ -123,6 +106,20 @@ export default {
       timeframes['tf:monthly'].start = monthStart;
       timeframes['tf:monthly'].end = monthEnd;
       this.currentTimeframes = timeframes;     
+    },
+    populateDataStore(uploadDataObj) {
+      //load the data: TODO: load to store
+      this.$store.commit('initialize', uploadDataObj);
+      this.hideUploadWidget();
+      console.log(this.tasks);
+
+      //TODO: fix with proper uuids or somesuch
+      this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
+        return Math.max(nextItem.id, accumulator);
+      }, 0);
+
+      //set up the clock!
+      //setInterval(this.checkTime, 3000); //every 3 secs
     }
   },
 
@@ -131,25 +128,24 @@ export default {
   },
 
   mounted() {
-    //initialize id generation
-    this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
-      return Math.max(nextItem.id, accumulator);
-    }, 0);
-
-    //set up the clock!
-    //setInterval(this.checkTime, 3000); //every 3 secs
   },
 
   computed: {
+    ...mapState(['tasks','goals','executionLog','sentimentLog']),
     downloadDataset() {
+      if(!this.tasks) return '';
+
       const dataset = {
         tasks: this.tasks,
         goals: this.goals,
         executionLog: this.executionLog,
         sentimentLog: this.sentimentLog
       };
-      var buffer = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataset).split(',').join(',\r\n'));
-      return buffer;
+
+      // let jsonstr = JSON.stringify(dataset).split(',').join(',\r\n');
+      const jsonstr = jsonbeautify(dataset, null, 2, 100);
+      const responseBuffer = "data:text/json;charset=utf-8," + encodeURIComponent(jsonstr);
+      return responseBuffer;
     }
   }
 }

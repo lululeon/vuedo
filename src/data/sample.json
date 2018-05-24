@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Jazz practice",
+      "targetReached": false,
+      "metric": { "timeframe": "tf:daily", "uomId": "time:hour", "measureTarget": 3, "stepSize": 1 }
+    },
+    {
+      "id": 2,
+      "description": "Strength training at gym",
+      "targetReached": false,
+      "metric": { "timeframe": "tf:monthly", "uomId": "none:count", "measureTarget": 8, "stepSize": 1 }
+    },
+    {
+      "id": 3,
+      "description": "meditation practice",
+      "targetReached": false,
+      "metric": { "timeframe": "tf:weekly", "uomId": "time:minute", "measureTarget": 60, "stepSize": 15 }
+    }
+  ],
+  "goals": [ { "id": 1, "name": "Learn to be happy in life!" } ],
+  "executionLog": [
+    { "taskId": 1, "timestamp": "2018-05-19T14:00:03", "value": 2, "targetReached": false },
+    { "taskId": 2, "timestamp": "2018-05-19T10:00:05", "value": 1, "targetReached": false },
+    { "taskId": 2, "timestamp": "2018-05-20T17:37:02", "value": 2, "targetReached": false },
+    { "taskId": 1, "timestamp": "2018-05-21T18:11:12", "value": 4, "targetReached": true },
+    { "taskId": 2, "timestamp": "2018-05-22T09:02:00", "value": 3, "targetReached": true }
+  ],
+  "sentimentLog": [
+    {
+      "goalId": 1,
+      "timestamp": "2018-01-29T12:00:00",
+      "anxiety": 4,
+      "happiness": 5,
+      "achieving": true
+    }
+  ]
+}
