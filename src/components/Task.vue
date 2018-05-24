@@ -48,9 +48,6 @@ export default {
       type: Object,
       required: true
     },
-    executionLog: {
-      type: Array
-    },
     onDelete: {
       type: Function,
       required: true
@@ -59,8 +56,6 @@ export default {
 
   data() {
     return {
-      value: 0,
-      filteredLogs: []
     };
   },
 
@@ -70,31 +65,18 @@ export default {
       //todo: prompt to delete measures as well.
     },
     increment() {
-      // ----- { taskId: 1, timestamp:'yyyy-mm-ddThh:mm:ss', value: 2, targetReached: false } ----
       const taskId = this.task.id;
       const timestamp = moment().format();
       const value = this.task.metric.stepSize * uomList[this.task.metric.uomId].uomMultiplier; //stepSize x metric.uomMultiplier
       const targetReached = (value >= this.task.measureTarget) ? true : false;
-      this.executionLog.unshift({ taskId, timestamp, value, targetReached });
-      this.updateAnalytics();
+      const logItem = { taskId, timestamp, value, targetReached };
+      this.$store.commit('newExecutionLog', logItem);
     },
     decrement() {
       if(this.runningTotal === 0) {
         return;
       }
-      this.executionLog.shift();
-      this.updateAnalytics();
-    },
-    updateAnalytics() {
-      //get logs relevant to current timeframe only
-      this.filteredLogs = this.executionLog.filter(execItem => {
-        return moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
-      });
-
-      //calculate initial progress value relative to current timeframe
-      this.value = this.filteredLogs.reduce((accumulator, nextItem) => {
-        return (accumulator + nextItem.value);
-      }, 0);
+      this.$store.commit('undoExecutionLogByTaskId', this.task.id);
     },
     getUomAttr(id, attr) {
       if(!uomList[id]) return '';
@@ -104,6 +86,22 @@ export default {
   },
 
   computed: {
+    executionLog() { //executionLog for THIS task only
+      if(!this.$store.state.executionLog) return [];
+      return this.$store.state.executionLog.filter(execItem => {
+        return (execItem.taskId === this.task.id);
+      });
+    },
+    filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
+      return this.executionLog.filter(execItem => {
+        return moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+      });
+    },
+    value() {
+      return this.filteredLogs.reduce((accumulator, nextItem) => {
+        return (accumulator + nextItem.value);
+      }, 0);
+    },
     runningTotal() {
       return mathjs.round(this.value / uomList[this.task.metric.uomId].uomMultiplier, 2);
     },
@@ -138,19 +136,6 @@ export default {
   },
 
   mounted() {
-    if(this.executionLog.length > 1) {
-      this.executionLog.sort((a, b) => {
-        const datetimestringA = a.timestamp.toLowerCase();
-        const datetimestringB = b.timestamp.toLowerCase();
-        //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
-        if (datetimestringA > datetimestringB) {
-          return -1;
-        }
-        return 1;
-      });
-    }
-
-    this.updateAnalytics();
   }
 }
 </script>

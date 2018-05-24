@@ -32,8 +32,7 @@
     <transition-group name="taskpop" tag="div" class="tasklist">
       <Task v-for="task in tasks" 
         :key="task.id" 
-        :task="task" 
-        :executionLog="getExecutionLog(task.id)" 
+        :task="task"
         :currentTimeframe="currentTimeframes[task.metric.timeframe]"
         :onDelete="deleteTask" />
     </transition-group>
@@ -47,7 +46,7 @@
 <script>
 import moment from 'moment';
 import jsonbeautify from 'json-beautify';
-import { mapState } from 'vuex'
+import { mapState } from 'vuex';
 import Task from './Task.vue';
 import InputForm from './InputForm';
 import UploadWidget from './UploadWidget';
@@ -63,47 +62,6 @@ export default {
   data() {
     //in components, you must RETURN the data object
     return {
-      /*
-      tasks: [
-        { id: 1, description: 'Jazz practice', targetReached: false, 
-          metric: {
-            timeframe: 'tf:daily',
-            uomId: 'time:hour',
-            measureTarget: 3,
-            stepSize: 1 // default
-          }
-        },
-        { id: 2, description: 'Strength training at gym', targetReached: false,
-          metric: {
-            timeframe: 'tf:monthly',
-            uomId: 'none:count',
-            measureTarget: 8,
-            stepSize: 1 // default
-          }
-        },
-        { id: 3, description: 'meditation practice', targetReached: false,
-          metric: {
-            timeframe: 'tf:weekly',
-            uomId: 'time:minute',
-            measureTarget: 60,
-            stepSize: 15 // default
-          }
-       }
-      ],
-      goals: [
-        { id: 1, name: 'Learn to be happy in life!'}
-      ],
-      executionLog: [
-        { taskId: 1, timestamp:'2018-05-19T14:00:03', value: 2, targetReached: false },
-        { taskId: 2, timestamp:'2018-05-19T10:00:05', value: 1, targetReached: false },
-        { taskId: 2, timestamp:'2018-05-20T17:37:02', value: 2, targetReached: false },
-        { taskId: 1, timestamp:'2018-05-21T18:11:12', value: 4, targetReached: true },
-        { taskId: 2, timestamp:'2018-05-22T09:02:00', value: 3, targetReached: true }
-      ],
-      sentimentLog: [
-        { goalId: 1, timestamp:'2018-01-29T12:00:00', anxiety:4, happiness:5, achieving:true }
-      ],
-      */
       nextId: 1,
       showInputForm:false,
       showUploadWidget:false,
@@ -134,12 +92,6 @@ export default {
       });
       this.tasks.splice(idx, 1);
     },
-    getExecutionLog(taskId) {
-      if(!this.$store.executionLog) return [];
-      return this.$store.executionLog.filter(execItem => {
-        return (execItem.taskId === taskId);
-      });
-    },
     updateTimeframes() {
       const dayStart = moment().startOf('day');
       const dayEnd = moment().endOf('day');
@@ -161,11 +113,8 @@ export default {
       this.hideUploadWidget();
       console.log(this.tasks);
 
-      //initialize id generation
-      // this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
-      //   return Math.max(nextItem.id, accumulator);
-      // }, 0);
-      this.nextId = 1 + this.$store.getters.tasks.reduce((accumulator, nextItem) => {
+      //TODO: fix with proper uuids or somesuch
+      this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
         return Math.max(nextItem.id, accumulator);
       }, 0);
 
@@ -182,7 +131,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['tasks']),
+    ...mapState(['tasks','goals','executionLog','sentimentLog']),
     downloadDataset() {
       if(!this.tasks) return '';
 
