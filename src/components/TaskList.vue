@@ -24,6 +24,10 @@
         </a>
       </div>
     </div>
+    <UploadWidget 
+      v-if="showUploadWidget"
+      @hideUploadWidget="hideUploadWidget"
+      @uploadReady="populateDataStore" />
     <InputForm
       :nextId="nextId" 
       @saveNewTask="saveTask"
@@ -36,10 +40,6 @@
         :currentTimeframe="currentTimeframes[task.metric.timeframe]"
         :onDelete="deleteTask" />
     </transition-group>
-    <UploadWidget 
-      v-if="showUploadWidget"
-      @hideUploadWidget="hideUploadWidget"
-      @uploadReady="populateDataStore" />
   </div>
 </template>
 
@@ -72,9 +72,11 @@ export default {
   methods: {
     addTask() {
       this.showInputForm = true;
+      this.hideUploadWidget();
     },
     loadTasks() {
       this.showUploadWidget = true;
+      this.hideInputForm();
     },
     hideInputForm() {
       this.showInputForm = false;
