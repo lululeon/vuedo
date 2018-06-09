@@ -124,25 +124,19 @@ export default {
           stepSize: stepsz
         }
       });
-      this.clearInputPanel();
+      this.clearInputErrors();
     },
-    clearInputPanel() {
+    clearInputErrors() {
       this.showDescriptionErr = false;
       this.showMeasureTargetErr = false;
       this.showStepSizeErr = false;
-    },
-    deleteTask(taskId) {
-      let idx = this.tasks.findIndex((task)=>{
-        return (task.id == taskId);
-      });
-      this.tasks.splice(idx, 1);
     },
     setBlankTask(newNextId) {
       this.newtask = {
         id: newNextId || this.nextId, //first time, get from props; thereafter from watched prop changes.
         description: '',
         //nested objs don't work well with vue 2way binding
-        //metric: { uomId: 'none:count', timeframe: 'daily', measureTarget: 1 },
+        //metric: { uomId: 'none:count', timeframe: 'daily', measureTarget: 1, 'stepSize': 1 },
         metricTimeframe: defaultTimeFrameCode, //daily
         metricUomId: defaultUOMId,
         metricMeasureTarget: 1,

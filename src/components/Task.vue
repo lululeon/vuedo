@@ -1,9 +1,7 @@
 <template>
   <article class="task">
     <header class="task-header">
-      <span class="task-header-title">
-        {{task.description}}
-      </span>
+      <TaskTitleWidget :tasktitle="task.description" @description="onUpdateDescription"/>
       <div class="task-measure counter">
         <a @click="decrement" aria-label="decrement count">-</a>
       </div>
@@ -20,9 +18,6 @@
       </div>
     </div>
     <div class="task-footer buttons">
-      <button class="button primary is-warning is-outlined">
-        <span class="icon"><font-awesome-icon :icon="['fas', 'edit']" /></span>
-      </button>
       <button class="button primary is-danger is-outlined" @click="deleteTask">
         <span class="icon"><font-awesome-icon :icon="['fas', 'trash-alt']" /></span>
       </button>
@@ -34,10 +29,13 @@
 import mathjs from 'mathjs';
 import moment from 'moment';
 import uomList from '../data/uom';
+import TaskTitleWidget from './TaskTitleWidget';
+
 
 export default {
   name: 'Task',
   components: {
+    TaskTitleWidget
   },
   props: {
     task: {
@@ -64,6 +62,11 @@ export default {
       this.onDelete(this.task.id);
       //todo: prompt to delete measures as well.
     },
+    onUpdateDescription(updDescr) {
+      const updTask = this.task;
+      updTask.description = updDescr;
+      this.$store.commit('updateTask', updTask);
+    },
     increment() {
       const taskId = this.task.id;
       const timestamp = moment().format();
@@ -86,6 +89,9 @@ export default {
   },
 
   computed: {
+    tasktitle() {
+      return (this.task.description);
+    },
     executionLog() { //executionLog for THIS task only
       if(!this.$store.state.executionLog) return [];
       return this.$store.state.executionLog.filter(execItem => {
