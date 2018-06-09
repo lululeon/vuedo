@@ -113,7 +113,6 @@ export default {
       //load the data: TODO: load to store
       this.$store.commit('initialize', uploadDataObj);
       this.hideUploadWidget();
-      console.log(this.tasks);
 
       //TODO: fix with proper uuids or somesuch
       this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {

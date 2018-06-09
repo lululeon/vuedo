@@ -69,6 +69,18 @@ const store = new Vuex.Store({
         });
       }
     },
+    updateTask (state, updatedTask) {
+      let tasks = state.tasks;
+      for(let i=0; i<tasks.length; i++){
+        const curTask = tasks[i];
+        if (curTask.id === updatedTask.id) {
+          //update item and exit loop
+          tasks.splice(i, 1, updatedTask);
+          break;
+        }
+      }
+      Vue.set(state, 'tasks', tasks);
+    },
     newExecutionLog (state, logItem) {
       Vue.set(state, 'executionLog', [logItem, ...state.executionLog]); //preserve descending order (latest at top)
     },
