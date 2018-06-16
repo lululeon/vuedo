@@ -1,7 +1,7 @@
 <template>
   <article class="task">
     <header class="task-header">
-      <TaskTitleWidget :tasktitle="task.description" @description="onUpdateDescription"/>
+      <EditableText class="task-header-title" :content="tasktitle" @updated="onUpdateDescription" />
       <div class="task-measure counter">
         <a @click="decrement" aria-label="decrement count">-</a>
       </div>
@@ -29,13 +29,13 @@
 import mathjs from 'mathjs';
 import moment from 'moment';
 import uomList from '../data/uom';
-import TaskTitleWidget from './TaskTitleWidget';
+import EditableText from './elements/EditableText';
 
 
 export default {
   name: 'Task',
   components: {
-    TaskTitleWidget
+    EditableText
   },
   props: {
     task: {
@@ -63,9 +63,12 @@ export default {
       //todo: prompt to delete measures as well.
     },
     onUpdateDescription(updDescr) {
-      const updTask = this.task;
-      updTask.description = updDescr;
-      this.$store.commit('updateTask', updTask);
+      if(updDescr !== this.tasktitle ) {
+        //update if changed
+        const updTask = this.task;
+        updTask.description = updDescr;
+        this.$store.commit('updateTask', updTask);
+      }
     },
     increment() {
       const taskId = this.task.id;
