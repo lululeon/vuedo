@@ -73,8 +73,11 @@ export default {
 
 
 <style scoped>
-button.edithint {
+button {
   display: initial;
+  margin-left: 0.5rem;
+}
+button.edithint {
   opacity: 0;
 }
 span:hover {
@@ -82,11 +85,10 @@ span:hover {
 }
 span[contenteditable=true]:focus {
   color: #209cee;
-  padding: 0 0.5rem;
   cursor: initial;
   outline: none;
 }
-span:hover + button {
+span:hover + button.edithint {
   opacity: 0.5;
 }
 </style>
