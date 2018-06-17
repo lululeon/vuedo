@@ -29,14 +29,16 @@
         </a>
       </div>
     </header>
-    <div class="task-body" v-if="expanded">
-      <div class="task-meta-cells">
-        <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
-        <div class="task-meta-cell large" :class="{'is-active': editingTargets}" @click="editTargets"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
-        <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
-        <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
+    <transition name="slide-down">
+      <div class="task-body" v-if="expanded">
+        <div class="task-meta-cells">
+          <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
+          <div class="task-meta-cell large" :class="{'is-active': editingTargets}" @click="editTargets"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
+          <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
+          <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
+        </div>
       </div>
-    </div>
+    </transition>
     <modal v-if="editingTargets"/>
   </article>
 </template>
@@ -199,7 +201,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './node_modules/bulma/bulma.sass';
+@import '../../node_modules/bulma/bulma.sass';
 
 /* progress and status colors - may move to a more central location later */
 $status-notstarted: $danger;
@@ -292,8 +294,38 @@ $status-exceeding: $turquoise;
   }
 }
 /* =================== TASK BODY =================== */
+/* animations */
+.slide-down-enter-active {
+  animation: slide 0.2s;
+}
+.slide-down-leave-active {
+  animation: sliderev 0.2s;
+}
+@keyframes slide {
+  0% {
+    transform: translateY(-20%);
+  }
+  60% {
+    transform: translateY(-2%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+@keyframes sliderev {
+  0% {
+    transform: translateY(0%);
+  }
+  40% {
+    transform: translateY(-10%);
+  }
+  100% {
+    transform: translateY(-20%);
+  }
+}
+/* end animations */
 .task-body {
-  margin: 0.5rem 0;
+  margin-bottom: 0.5rem;
   padding: 0 0.5rem;
 }
 .task-meta-cells {
