@@ -68,8 +68,8 @@
 </template>
 
 <script>
-import uomList from '../data/uom';
-import timeframesList from '../data/timeframes';
+import { uomList, uomListAsSelectOptions } from '../data/uom';
+import { timeframesList, timeframesListAsSelectOptions } from '../data/timeframes';
 const defaultUOMId = 'none:count';
 const defaultTimeFrameCode = 'tf:daily';
 
@@ -151,18 +151,10 @@ export default {
   },
   computed: {
     uomOptions() {
-      const options = [];
-      Object.keys(uomList).forEach((k) => {
-        options.push({ value:k, label:uomList[k].uomLabel });
-      });
-      return options;
+      return uomListAsSelectOptions();
     },
     timeframeOptions() {
-      const options = [];
-      Object.keys(timeframesList).forEach((k) => {
-        options.push({ value:k, label:timeframesList[k].name });
-      });
-      return options;
+      return timeframesListAsSelectOptions();
     },
     prompts() {
       const targetAmt = this.newtask.metricMeasureTarget || 1;

@@ -50,7 +50,7 @@ import { mapState } from 'vuex';
 import Task from './Task.vue';
 import InputForm from './InputForm';
 import UploadWidget from './UploadWidget';
-import timeframes from '../data/timeframes';
+import { timeframesList } from '../data/timeframes';
 
 export default {
   name: 'TaskList',
@@ -101,6 +101,7 @@ export default {
       const weekEnd = moment().endOf('isoWeek');
       const monthStart = moment().startOf('month');
       const monthEnd = moment().endOf('month');
+      const timeframes = timeframesList;
       timeframes['tf:daily'].start = dayStart;
       timeframes['tf:daily'].end = dayEnd;
       timeframes['tf:weekly'].start = weekStart;
