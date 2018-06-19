@@ -33,21 +33,31 @@
       <div class="task-body" v-if="expanded">
         <div class="task-meta-cells">
           <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
-          <div class="task-meta-cell large" :class="{'is-active': editingTargets}" @click="editTargets"><span>target</span><span>{{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}</span></div>
+          <div class="task-meta-cell large">
+            <span>target</span>
+            <span @click="editTargets">
+              {{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}
+              <a class="icon"><font-awesome-icon :icon="['fas', 'pencil-alt']" /></a>
+            </span>
+          </div>
           <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
           <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
         </div>
       </div>
     </transition>
-    <modal v-if="editingTargets"/>
+    <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
+      <template slot="title">{{modalTitle}}</template>
+      <template :is="modalContent" slot="content"/>
+    </modal>
   </article>
 </template>
 
 <script>
 import mathjs from 'mathjs';
 import moment from 'moment';
-import uomList from '../data/uom';
+import { uomList } from '../data/uom';
 import EditableText from './elements/EditableText';
+import EditTargetsForm from './EditTargetsForm';
 import Modal from './Modal';
 
 
@@ -55,7 +65,8 @@ export default {
   name: 'Task',
   components: {
     EditableText,
-    Modal
+    Modal,
+    EditTargetsForm
   },
   props: {
     task: {
@@ -75,7 +86,10 @@ export default {
   data() {
     return {
       expanded: false,
-      editingTargets: false
+      editingTargets: false,
+      showModal: false,
+      modalTitle: '',
+      modalContent: ''
     };
   },
 
@@ -94,6 +108,17 @@ export default {
     },
     editTargets() {
       this.editingTargets = true;
+      this.modalTitle = 'Edit task target';
+      this.modalContent = 'EditTargetsForm';
+      this.openPopup();
+    },
+    openPopup() {
+      this.showModal = true;
+    },
+    closePopup(){
+      this.modalTitle = '';
+      this.modalContent = '';
+      this.showModal = false;
     },
     expand() {
       this.expanded = true;
@@ -386,6 +411,16 @@ $status-exceeding: $turquoise;
   }
   span {
     padding: 0.5rem;
+    &>a {
+      opacity: 0;
+      color: $grey-light;
+    }
+    &:hover {
+      cursor: pointer;
+      &>a {
+        opacity: 0.8;
+      }
+    }
     &:first-child {
       border-radius: 0.2rem 0.2rem 0 0;
       font-weight: bold;

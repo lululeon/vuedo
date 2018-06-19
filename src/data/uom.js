@@ -1,4 +1,4 @@
-export default {
+export const uomList = {
     // dimensionless metrics
     'none:count': {
         uomShorthand: 'times',
@@ -82,3 +82,16 @@ export default {
         uomMultiplier: 1
     }
 };
+
+export const uomListAsSelectOptions = function() {
+  const options = [];
+  Object.keys(uomList).forEach((k) => {
+    options.push({ value:k, label:uomList[k].uomLabel });
+  });
+  return options;
+};
+
+export default {
+  uomList,
+  uomListAsSelectOptions
+}

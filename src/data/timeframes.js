@@ -1,4 +1,4 @@
-export default {
+export const timeframesList = {
     'tf:daily' : {
       name: 'Daily',
       immediacyLabel: 'today', //eg 3 times today
@@ -14,4 +14,17 @@ export default {
       immediacyLabel: 'this month',
       freqLabel: 'a month'
     }
+};
+
+export const timeframesListAsSelectOptions = function() {
+  const options = [];
+  Object.keys(timeframesList).forEach((k) => {
+    options.push({ value:k, label:timeframesList[k].name });
+  });
+  return options;
+};
+
+export default {
+  timeframesList,
+  timeframesListAsSelectOptions
 };
