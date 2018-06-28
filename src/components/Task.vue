@@ -2,7 +2,9 @@
   <article class="task">
     <header class="task-header">
       <EditableText class="task-header-title" :content="tasktitle" @updated="onUpdateDescription" />
-      <span  class="ministatus" :class="runningTotalStyling" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
+      <transition name="latepop" tag="span">
+        <span  class="ministatus" :class="runningTotalStyling" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
+      </transition>
       <div class="task-header-ctrlbtn">
         <a @click="decrement" aria-label="decrement count">
           <span class="icon"><font-awesome-icon :icon="['fas', 'minus']" /></span>
@@ -45,7 +47,7 @@
         </div>
       </div>
     </transition>
-    <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
+    <modal :class="{'is-active': showModal}" @close="closePopup" :task=task v-if="showModal">
       <template slot="title">{{modalTitle}}</template>
       <template :is="modalContent" slot="content"/>
     </modal>
@@ -308,6 +310,7 @@ $status-exceeding: $turquoise;
   border-radius: 0.3rem;
   margin: 0.2rem;
   color: $white;
+  opacity: 1;
   &.notstarted { @extend .notstarted; }
   &.failing { @extend .failing; }
   &.slacking { @extend .slacking; }
@@ -320,32 +323,32 @@ $status-exceeding: $turquoise;
 }
 /* =================== TASK BODY =================== */
 /* animations */
+.latepop-enter-active {
+  animation: latepop 1s;
+}
+.latepop-leave-active {
+  animation: latepop 0.4s reverse;
+}
+@keyframes latepop {
+  0% { opacity: 0; }
+  30% { opacity: 0; }
+  100% { opacity: 1; }
+}
 .slide-down-enter-active {
-  animation: slide 0.2s;
+  animation: slide 0.4s;
 }
 .slide-down-leave-active {
-  animation: sliderev 0.2s;
+  animation: slide 0.5s reverse;
 }
 @keyframes slide {
   0% {
     transform: translateY(-20%);
   }
   60% {
-    transform: translateY(-2%);
+    transform: translateY(0%);
   }
   100% {
     transform: translateY(0%);
-  }
-}
-@keyframes sliderev {
-  0% {
-    transform: translateY(0%);
-  }
-  40% {
-    transform: translateY(-10%);
-  }
-  100% {
-    transform: translateY(-20%);
   }
 }
 /* end animations */
