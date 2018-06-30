@@ -3,7 +3,7 @@
     <header class="task-header">
       <EditableText class="task-header-title" :content="tasktitle" @updated="onUpdateDescription" />
       <transition name="latepop" tag="span">
-        <span  class="ministatus" :class="runningTotalStyling" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
+        <span  class="task-status" :class="status" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
       </transition>
       <div class="task-header-ctrlbtn">
         <a @click="decrement" aria-label="decrement count">
@@ -43,13 +43,14 @@
             </span>
           </div>
           <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
-          <div class="task-value-cell" :class="runningTotalStyling" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
+          <div class="task-value-cell" :class="status" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
         </div>
       </div>
     </transition>
-    <modal :class="{'is-active': showModal}" @close="closePopup" :task=task v-if="showModal">
-      <template slot="title">{{modalTitle}}</template>
-      <template :is="modalContent" slot="content"/>
+    <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
+      <template slot="status"><span class="task-status pill" :class="status">{{ status }}</span></template>
+      <template slot="title">{{ tasktitle }}</template>
+      <template :is="modalContent" :task=task :running-total="runningTotal" slot="content"/>
     </modal>
   </article>
 </template>
@@ -58,6 +59,7 @@
 import mathjs from 'mathjs';
 import moment from 'moment';
 import { uomList } from '../data/uom';
+import { getStatus } from '../utils/status.js';
 import EditableText from './elements/EditableText';
 import EditTargetsForm from './EditTargetsForm';
 import Modal from './Modal';
@@ -90,7 +92,6 @@ export default {
       expanded: false,
       editingTargets: false,
       showModal: false,
-      modalTitle: '',
       modalContent: ''
     };
   },
@@ -110,7 +111,6 @@ export default {
     },
     editTargets() {
       this.editingTargets = true;
-      this.modalTitle = 'Edit task target';
       this.modalContent = 'EditTargetsForm';
       this.openPopup();
     },
@@ -118,7 +118,6 @@ export default {
       this.showModal = true;
     },
     closePopup(){
-      this.modalTitle = '';
       this.modalContent = '';
       this.showModal = false;
     },
@@ -189,37 +188,10 @@ export default {
     thisTimeframeText() {
       return this.currentTimeframe.immediacyLabel;
     },
-    runningTotalStyling() {
+    status() {
       const rt = this.runningTotal; //display units, not raw units.
       const target = this.task.metric.measureTarget; //display units, not raw units.
-      const failingLimit = 0.2*target;
-      const slackingLimit = 0.4*target;
-      const progressingLimit = 0.75*target;
-      const achievingLimit = 0.95*target;
-      const achievedLimit = target;
-      const exceedingLimit = 1.1*target;
-      if (rt > 0) {
-        if (rt < failingLimit) {
-          return 'failing';
-        }
-        if (rt < slackingLimit) {
-          return 'slacking';
-        }
-        if (rt < progressingLimit) {
-          return 'progressing';
-        }
-        if (rt < achievingLimit) {
-          return 'achieving';
-        }
-        if (rt < achievedLimit) {
-          return 'achieved';
-        }
-        if( rt > exceedingLimit) {
-          return 'exceeding';
-        }
-        return 'achieved';
-      }
-      return 'notstarted';
+      return getStatus(rt,target);
     }
   },
   mounted() {
@@ -228,39 +200,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../node_modules/bulma/bulma.sass';
-
-/* progress and status colors - may move to a more central location later */
-$status-notstarted: $danger;
-$status-failing: #ff583b;
-$status-slacking:#ff800f;
-$status-progressing: #ffc107;
-$status-achieving: #bfc22c;
-$status-achieved: #8bc34a;
-$status-exceeding: $turquoise;
-
-.notstarted {
-  background-color: $status-notstarted;
-}
-.failing {
-  background-color: $status-failing;
-}
-.slacking {
-  background-color: $status-slacking;
-}
-.progressing {
-  background-color: $status-progressing;
-}
-.achieving {
-  background-color: $status-achieving;
-}
-.achieved {
-  background-color: $status-achieved;
-}
-.exceeding {
-  background-color: $status-exceeding;
-}
-
+@import '../css/main.scss';
 .task {
   margin: 0.8rem 0;
   border-radius: 0.3rem;
@@ -305,18 +245,13 @@ $status-exceeding: $turquoise;
     font-size: small;
   }
 }
-.ministatus {
+.task-status {
+  @extend .task-status;
   padding: 0.5rem;
   border-radius: 0.3rem;
   margin: 0.2rem;
   color: $white;
   opacity: 1;
-  &.notstarted { @extend .notstarted; }
-  &.failing { @extend .failing; }
-  &.slacking { @extend .slacking; }
-  &.achieving { @extend .achieving; }
-  &.achieved { @extend .achieved; }
-  &.exceeding { @extend .exceeding; }
   @media screen and (max-width: 450px) {
     width: 100%;
   }
@@ -361,7 +296,7 @@ $status-exceeding: $turquoise;
   padding: 0.2rem;
   border-radius: 0.3rem;
   background-color: $light;
-  @media screen and (max-width: 450px) {
+  @media screen and (max-width: 650px) {
     flex-direction: column;
     margin:0;
     border-radius: 0;
@@ -377,6 +312,8 @@ $status-exceeding: $turquoise;
 }
 .task-value-cell {
   width: 200px;
+  min-width: 150px;
+  flex: 0 1 auto;
   color: $white;
   span {
     padding: 0.5rem;
@@ -385,14 +322,14 @@ $status-exceeding: $turquoise;
       border-radius: 0.2rem 0.2rem 0 0;
     }
   }
-  &.notstarted { @extend .notstarted; }
+  &.not-started { @extend .not-started; }
   &.failing { @extend .failing; }
   &.slacking { @extend .slacking; }
   &.achieving { @extend .achieving; }
   &.achieved { @extend .achieved; }
   &.exceeding { @extend .exceeding; }
 
-  @media screen and (max-width: 450px) {
+  @media screen and (max-width: 650px) {
     flex-direction: row;
     width: 100%;
     margin:0;
@@ -410,7 +347,7 @@ $status-exceeding: $turquoise;
   }
   &.large {
     min-width: 150px;
-    flex: 1 1 auto;
+    flex: 1 2 auto; /* shrink more rapidly */
   }
   span {
     padding: 0.5rem;
@@ -429,7 +366,7 @@ $status-exceeding: $turquoise;
       font-weight: bold;
     }
   }
-  @media screen and (max-width: 450px) {
+  @media screen and (max-width: 650px) {
     flex-direction: row;
     width: 100%;
     margin:0;

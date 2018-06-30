@@ -162,20 +162,31 @@ export default {
   animation: pop 0.25s;
 }
 .taskpop-leave-active {
-  animation: pop 0.5s reverse;
+  animation: popreverse 0.5s; /* reverse; IE10 wld not anim correctly*/
 }
 @keyframes pop {
   0% {
-    background-color: none;
     transform: scale(0.9) translateY(-5%);
   }
   90% {
-    background-color: #fcdd57;
     transform: scale(1.02);    
   }
   100% {
-    background-color: none;
     transform: scale(1) translateY(0%);
   }
 }
+@keyframes popreverse {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.02);
+    opacity: 0.5;   
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+
 </style>
