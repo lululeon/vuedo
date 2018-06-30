@@ -35,9 +35,6 @@ const store = new Vuex.Store({
     sentimentLog: []
   },
   mutations: {
-    // increment (state) {
-    //   state.count++
-    // }
     initialize (state, initPayload) {
       //cannot mutate root obj; breaks reactivity... so doing properties one by one...
       state.goals = initPayload.goals;

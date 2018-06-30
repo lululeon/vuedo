@@ -1,0 +1,34 @@
+.not-started {
+  background-color: $status-not-started;
+}
+.failing { //TODO: label should be negative only if ample time has passed, else sthg like 'just-started'.
+  background-color: $status-failing;
+}
+.slacking { //TODO: label should be negative only if ample time has passed, else sthg like 'needs-work'.
+  background-color: $status-slacking;
+}
+.progressing {
+  background-color: $status-progressing;
+}
+.achieving {
+  background-color: $status-achieving;
+}
+.achieved {
+  background-color: $status-achieved;
+}
+.exceeding {
+  background-color: $status-exceeding;
+}
+
+.task-status {
+  color: $white;
+  &.not-started { @extend .not-started; }
+  &.failing { @extend .failing; }
+  &.slacking { @extend .slacking; }
+  &.achieving { @extend .achieving; }
+  &.achieved { @extend .achieved; }
+  &.exceeding { @extend .exceeding; }
+  &.pill {
+    border-radius: 4px;
+  }
+}
