@@ -3,7 +3,6 @@
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
-        <slot name="status"/>
         <span class="modal-card-title"><slot name="title"/></span>
         <button class="delete is-medium" @click="$emit('close')" aria-label="close"></button>
       </header>
@@ -31,9 +30,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../node_modules/bulma/bulma.sass';
-.task-status.pill {
-  white-space: nowrap;
-}
 .modal-card-title {
   white-space: nowrap; 
   overflow: hidden;

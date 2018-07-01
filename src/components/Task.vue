@@ -48,8 +48,7 @@
       </div>
     </transition>
     <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
-      <template slot="status"><span class="task-status pill" :class="status">{{ status }}</span></template>
-      <template slot="title">{{ tasktitle }}</template>
+      <template slot="title"><span class="task-status textonly" :class="status">{{ status }}</span> {{ tasktitle }}</template>
       <template :is="modalContent" :task=task :running-total="runningTotal" slot="content"/>
     </modal>
   </article>
