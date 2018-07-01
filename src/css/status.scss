@@ -22,12 +22,98 @@
 
 .task-status {
   color: $white;
-  &.not-started { @extend .not-started; }
-  &.failing { @extend .failing; }
-  &.slacking { @extend .slacking; }
-  &.achieving { @extend .achieving; }
-  &.achieved { @extend .achieved; }
-  &.exceeding { @extend .exceeding; }
+  white-space: nowrap;
+  &.not-started {
+    @extend .not-started;
+    &.outline { 
+      color: $status-not-started;
+      border: 1px solid $status-not-started;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-not-started;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.failing {
+    @extend .failing; 
+    &.outline {
+      color: $status-failing; 
+      border: 1px solid $status-failing;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-failing;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.slacking {
+    @extend .slacking;
+    &.outline { 
+      color: $status-slacking;
+      border: 1px solid $status-slacking;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-slacking;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.progressing {
+    @extend .progressing;
+    &.outline { 
+      color: $status-progressing;
+      border: 1px solid $status-progressing;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-progressing;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.achieving {
+    @extend .achieving;
+    &.outline {
+      color: $status-achieving;
+      border: 1px solid $status-achieving;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-achieving;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.achieved {
+    @extend .achieved; 
+    &.outline { 
+      color: $status-achieved;
+      border: 1px solid $status-achieved;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-achieved;
+      border: none;
+      background-color:transparent;
+    }
+  }
+  &.exceeding {
+    @extend .exceeding;
+    &.outline { 
+      color: $status-exceeding;
+      border: 1px solid $status-exceeding;
+      background-color:transparent;
+    }
+    &.textonly { 
+      color: $status-exceeding;
+      border: none;
+      background-color:transparent;
+    }
+  }
   &.pill {
     border-radius: 4px;
   }

@@ -36,16 +36,18 @@ export default {
       const files = this.$refs.uploadInput.files;
       const selectedFile = files[0];
       const filenametest = selectedFile.name.toLowerCase();
-      //filetype
-      if( (selectedFile.type !== 'application/json') || 
-          !filenametest.endsWith('.json')
-        ) {
+
+      // file mime type is being received as blank in IE / Edge browser, so don't use.
+      // if( (selectedFile.type !== 'application/json') ||
+
+      if (!filenametest.endsWith('.json')) {
         this.errorMsg = "Sorry! You can only upload a .json file!";
         this.error = true;
         return;
       }
+
       //file size
-      if(selectedFile.size >= 512000) {
+      if (selectedFile.size >= 512000) {
         this.errorMsg = "Your dataset is too big! We only process files of up to 500 Kb in size.";
         this.error = true;
         return;
