@@ -1,18 +1,21 @@
 <template>
   <div>
-    <label class="label">Change how you measure progress:</label>
+    <label class="label">Change your targets:</label>
     <div class="horizontalform">
-      <p class="control has-icons-right targetbox">
-        <input class="input" type="text" v-model="target" />
-        <span class="icon is-small is-right" v-if="linkedEdits">
+      <p class="control has-icons-left targetbox">
+        <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" />
+        <span class="icon is-small is-left" v-if="linkedEdits">
           <font-awesome-icon :icon="['fas', 'link']" />
         </span>
       </p>
-      <div class="control">
+      <div class="control has-icons-left">
         <div class="select">
-          <select v-model="uomid">
+          <select v-model="uomid" @change="metricChanged">
             <option v-for="uom in uomOptions" :key="uom.value" :value="uom.value">{{ uom.label }}</option>
           </select>
+          <span class="icon is-small is-left" v-if="linkedEdits">
+            <font-awesome-icon :icon="['fas', 'link']" />
+          </span>
         </div>
       </div>
       <div class="control has-icons-left">
@@ -42,9 +45,9 @@
 </template>
 
 <script>
-import { uomListAsSelectOptions } from '../data/uom';
+import { uomList, uomListAsSelectOptions } from '../data/uom';
 import { timeframesList, timeframesListAsSelectOptions } from '../data/timeframes';
-import { getStatus } from '../utils/status.js';
+import { getStatus } from '../utils/status';
 
 export default {
   name:'EditTargetsForm',
@@ -58,10 +61,15 @@ export default {
       uomid: this.task.metric.uomId,
       timeframe: this.task.metric.timeframe,
       target: this.task.metric.measureTarget,
+      step: this.task.metric.stepSize,
 
       //for tracking changes
       prevTimeframe: this.task.metric.timeframe,
-      prevTarget: this.task.metric.measureTarget
+      prevUom: this.task.metric.uomId,
+      prevTarget: this.task.metric.measureTarget,
+
+      //for error highlighting
+      errTarget:false
     };
   },
   methods: {
@@ -69,13 +77,24 @@ export default {
       this.linkedEdits = !this.linkedEdits;
     },
     timeframeChanged() {
-      if(this.linkedEdits) {
+      if (this.linkedEdits) {
         // new target = previous target / [(previous timeframe multiplier) / (newly-chosen timeframe multiplier)]
         const tfOrig = timeframesList[this.prevTimeframe].tfmultiplier;
         const tfNew = timeframesList[this.timeframe].tfmultiplier;
         this.prevTimeframe = this.timeframe;
         this.prevTarget = this.target;
         this.target = this.target / (tfOrig/tfNew);
+      }
+    },
+    metricChanged() {
+      if (this.linkedEdits) {
+        // new target = previous target / [(newly-chosen metric multiplier) / (previous metric multiplier)]
+        const uomOrig = uomList[this.prevUom].uomMultiplier;
+        const uomNew = uomList[this.uomid].uomMultiplier;
+        this.prevUom = this.uomid;
+        this.prevTarget = this.target;
+        this.target = this.target / (uomNew/uomOrig);
+        this.step = this.step / (uomNew/uomOrig);
       }
     }
   },
@@ -91,6 +110,29 @@ export default {
     status() {
       return getStatus(this.runningTotal, this.target);
     }
+  },
+  mounted() {
+    //TODO: all eventHub-mediated signalling with modal should be extract to a mixin.
+    this.$eventHub.on('modalsave', (data) => {
+      //validate
+      if (this.uomid.trim() === '') {
+        this.errTarget = true;
+        return;
+      }
+      //update task metrics
+      console.log("saving data", data);
+      const updTask = { 
+        ...this.task, 
+        metric: {
+          uomId : this.uomid,
+          timeframe : this.timeframe,
+          measureTarget : this.target,
+          stepSize: this.step,
+        }
+      };
+      this.$store.commit('updateTask', updTask);
+      this.$eventHub.emit('modalcomplete');
+    });
   }
 }
 </script>

@@ -17,6 +17,7 @@
     "mathjs": "^4.2.2",
     "moment": "^2.22.1",
     "vue": "^2.5.16",
+    "vue-event-hub": "^1.0.2",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
