@@ -38,12 +38,12 @@
           <div class="task-meta-cell large">
             <span>target</span>
             <span @click="editTargets">
-              {{ task.metric.measureTarget }} {{ metric }} {{ timeframe }}
+              {{ task.metric.measureTarget | toTwoDecimalPlaces }} {{ metric }} {{ timeframe }}
               <a class="icon"><font-awesome-icon :icon="['fas', 'pencil-alt']" /></a>
             </span>
           </div>
-          <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize }} {{ stepSizeMetricLabel }}</span></div>
-          <div class="task-value-cell" :class="status" ><span>running total</span><span>{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span></div>
+          <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize | toTwoDecimalPlaces }} {{ stepSizeMetricLabel }}</span></div>
+          <div class="task-value-cell" :class="status" ><span>running total</span><span>{{ runningTotal | toTwoDecimalPlaces }} {{ metric }} {{ thisTimeframeText }} </span></div>
         </div>
       </div>
     </transition>
@@ -59,6 +59,7 @@ import mathjs from 'mathjs';
 import moment from 'moment';
 import { uomList } from '../data/uom';
 import { getStatus } from '../utils/status.js';
+import { toTwoDecimalPlaces } from '../utils/filters';
 import EditableText from './elements/EditableText';
 import EditTargetsForm from './EditTargetsForm';
 import Modal from './Modal';
@@ -95,10 +96,20 @@ export default {
     };
   },
 
+  filters: {
+    toTwoDecimalPlaces
+  },
+
   methods: {
+    // ============================== CRUD methods =========================
     deleteTask() {
       this.onDelete(this.task.id);
       //todo: prompt to delete measures as well.
+    },
+    editTargets() {
+      this.editingTargets = true;
+      this.modalContent = 'EditTargetsForm';
+      this.openPopup();
     },
     onUpdateDescription(updDescr) {
       if(updDescr !== this.tasktitle ) {
@@ -108,24 +119,7 @@ export default {
         this.$store.commit('updateTask', updTask);
       }
     },
-    editTargets() {
-      this.editingTargets = true;
-      this.modalContent = 'EditTargetsForm';
-      this.openPopup();
-    },
-    openPopup() {
-      this.showModal = true;
-    },
-    closePopup(){
-      this.modalContent = '';
-      this.showModal = false;
-    },
-    expand() {
-      this.expanded = true;
-    },
-    collapse() {
-      this.expanded = false;
-    },
+    //task tracking / atomic modifiers
     increment() {
       const taskId = this.task.id;
       const timestamp = moment().format();
@@ -140,6 +134,26 @@ export default {
       }
       this.$store.commit('undoExecutionLogByTaskId', this.task.id);
     },
+
+    // ============================ Modal controls ==========================
+    openPopup() {
+      this.showModal = true;
+    },
+    closePopup(){
+      this.modalContent = '';
+      this.showModal = false;
+    },
+
+
+    // ===================== UI / UX minor interactions  ====================
+    expand() {
+      this.expanded = true;
+    },
+    collapse() {
+      this.expanded = false;
+    },
+
+    // ======================== Miscellaneous utils ========================
     getUomAttr(id, attr) {
       if(!uomList[id]) return '';
       const val = uomList[id][attr];
@@ -194,6 +208,7 @@ export default {
     }
   },
   mounted() {
+
   }
 }
 </script>

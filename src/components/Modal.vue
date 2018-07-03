@@ -11,7 +11,7 @@
       </section>
       <footer class="modal-card-foot level">
         <div class="level-right">
-          <button class="button is-primary">Save changes</button>
+          <button class="button is-primary" @click="$eventHub.emit('modalsave')">Save changes</button>
           <button class="button" @click="$emit('close')">Cancel</button>
         </div>
       </footer>
@@ -24,6 +24,11 @@ export default {
   name:'Modal',
   props: {
     'title': { type: String }
+  },
+  mounted() {
+    this.$eventHub.on('modalcomplete', () => {
+      this.$emit('close');
+    });
   }
 }
 </script>
