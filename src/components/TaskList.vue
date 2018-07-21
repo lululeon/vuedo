@@ -2,6 +2,7 @@
   <div>
     <div class="level">
       <div class="level-left">
+        <EditableText :content="username" @updated="updateUsername" class="username"/>
         <button class="button level-item is-info" @click="loadTasks">
           <span class="icon">
             <font-awesome-icon :icon="['fas', 'file']" />
@@ -50,6 +51,7 @@ import { mapState } from 'vuex';
 import Task from './Task.vue';
 import InputForm from './InputForm';
 import UploadWidget from './UploadWidget';
+import EditableText from './elements/EditableText';
 import { timeframesList } from '../data/timeframes';
 
 export default {
@@ -57,7 +59,8 @@ export default {
   components: {
       Task,
       InputForm,
-      UploadWidget
+      UploadWidget,
+      EditableText
   },
   data() {
     //in components, you must RETURN the data object
@@ -93,6 +96,12 @@ export default {
         return (task.id == taskId);
       });
       this.tasks.splice(idx, 1);
+    },
+    updateUsername(updName) {
+      //check changed and valid, then:
+      if (updName === this.username) return; //nothing changed
+      if (updName.trim() === '') return; //not valid
+      this.$store.commit('updateUsername', updName);
     },
     updateTimeframes() {
       const dayStart = moment().startOf('day');
@@ -133,11 +142,12 @@ export default {
   },
 
   computed: {
-    ...mapState(['tasks','goals','executionLog','sentimentLog']),
+    ...mapState(['username','tasks','goals','executionLog','sentimentLog']),
     downloadDataset() {
       if(!this.tasks) return '';
 
       const dataset = {
+        username: this.username,
         tasks: this.tasks,
         goals: this.goals,
         executionLog: this.executionLog,
@@ -154,6 +164,9 @@ export default {
 </script>
 
 <style scoped>
+.username {
+  font-size: 2em;
+}
 .tasklist {
   display: flex;
   flex-direction: column-reverse;

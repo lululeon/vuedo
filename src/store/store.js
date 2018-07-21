@@ -5,6 +5,7 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
   state: {
+    username: 'anonymous',
     goals: [],
     tasks: [],
     executionLog: [],
@@ -13,6 +14,7 @@ export const store = new Vuex.Store({
   mutations: {
     initialize(state, initPayload) {
       //cannot mutate root obj; breaks reactivity... so doing properties one by one...
+      state.username = initPayload.username || 'anonymous';
       state.goals = initPayload.goals;
       state.tasks = initPayload.tasks;
       state.executionLog = initPayload.executionLog;
@@ -41,6 +43,9 @@ export const store = new Vuex.Store({
           return 1;
         });
       }
+    },
+    updateUsername(state, updatedName) {
+      Vue.set(state, 'username', updatedName);
     },
     updateTask(state, updatedTask) {
       let tasks = state.tasks;
