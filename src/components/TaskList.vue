@@ -92,10 +92,7 @@ export default {
       this.nextId += 1;
     },
     deleteTask(taskId) {
-      let idx = this.tasks.findIndex((task)=>{
-        return (task.id == taskId);
-      });
-      this.tasks.splice(idx, 1);
+      this.$store.commit('deleteTask', taskId);
     },
     updateUsername(updName) {
       //check changed and valid, then:

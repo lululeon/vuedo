@@ -3,7 +3,8 @@
     <label class="label">Change your targets:</label>
     <div class="horizontalform">
       <p class="control has-icons-left targetbox">
-        <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" />
+        <!-- <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" /> -->
+        <max2dpInput class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" :value="target" /> 
         <span class="icon is-small is-left" v-if="linkedEdits">
           <font-awesome-icon :icon="['fas', 'link']" />
         </span>
@@ -48,12 +49,17 @@
 import { uomList, uomListAsSelectOptions } from '../data/uom';
 import { timeframesList, timeframesListAsSelectOptions } from '../data/timeframes';
 import { getStatus } from '../utils/status';
+//import { toTwoDecimalPlaces } from '../utils/filters';
+import max2dpInput from './elements/MaxTwoDecimalPlacesInput';
 
 export default {
   name:'EditTargetsForm',
   props: {
     task: { type: Object, required: true },
     runningTotal: { type: Number }
+  },
+  components: {
+    max2dpInput
   },
   data() {
     return {
@@ -113,14 +119,13 @@ export default {
   },
   mounted() {
     //TODO: all eventHub-mediated signalling with modal should be extract to a mixin.
-    this.$eventHub.on('modalsave', (data) => {
+    this.$eventHub.on('modalsave', () => {
       //validate
       if (this.uomid.trim() === '') {
         this.errTarget = true;
         return;
       }
       //update task metrics
-      console.log("saving data", data);
       const updTask = { 
         ...this.task, 
         metric: {

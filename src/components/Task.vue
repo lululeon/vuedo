@@ -49,7 +49,8 @@
     </transition>
     <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
       <template slot="title"><span class="task-status textonly" :class="status">{{ status }}</span> {{ tasktitle }}</template>
-      <template :is="modalContent" :task=task :running-total="runningTotal" slot="content"/>
+      <template slot="content-raw">{{ modalContentRaw }}</template>
+      <template :is="modalContentComponent" :task=task :running-total="runningTotal" slot="content-component"/>
     </modal>
   </article>
 </template>
@@ -90,9 +91,10 @@ export default {
   data() {
     return {
       expanded: false,
-      editingTargets: false,
       showModal: false,
-      modalContent: ''
+      modalContentComponent: '',
+      modalContentRaw: '',
+      modalActionLabel: 'OK'
     };
   },
 
@@ -103,12 +105,16 @@ export default {
   methods: {
     // ============================== CRUD methods =========================
     deleteTask() {
-      this.onDelete(this.task.id);
-      //todo: prompt to delete measures as well.
+      this.modalContentComponent = '',
+      this.modalContentRaw = `Are you sure you want to delete this task including all of the logged measures for this task?`;
+      this.modalActionLabel = "Confirm";
+      this.openPopup();
+      //this.onDelete(this.task.id);
     },
     editTargets() {
-      this.editingTargets = true;
-      this.modalContent = 'EditTargetsForm';
+      this.modalContentComponent = 'EditTargetsForm';
+      this.modalContentRaw = '';
+      this.modalActionLabel = 'Save Edits';
       this.openPopup();
     },
     onUpdateDescription(updDescr) {
@@ -140,7 +146,8 @@ export default {
       this.showModal = true;
     },
     closePopup(){
-      this.modalContent = '';
+      this.modalContentComponent = '';
+      this.modalActionLabel = 'OK';
       this.showModal = false;
     },
 
@@ -165,15 +172,12 @@ export default {
     tasktitle() {
       return (this.task.description);
     },
-    executionLog() { //executionLog for THIS task only
+    filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
       if(!this.$store.state.executionLog) return [];
       return this.$store.state.executionLog.filter(execItem => {
-        return (execItem.taskId === this.task.id);
-      });
-    },
-    filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
-      return this.executionLog.filter(execItem => {
-        return moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+        const filtCriterion1 = (execItem.taskId === this.task.id);
+        const filtCriterion2 = moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+        return filtCriterion1 && filtCriterion2;
       });
     },
     value() {

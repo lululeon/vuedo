@@ -73,6 +73,18 @@ export const store = new Vuex.Store({
         }
       }
       Vue.set(state, 'executionLog', logList);
+    },
+    deleteTask(state, taskId) {
+      const taskList = state.tasks;
+      const idx = taskList.findIndex((task)=>{
+        return (task.id == taskId);
+      });
+      taskList.splice(idx, 1);
+      const logList = state.executionLog.filter((logItem) => logItem.taskId != taskId);
+
+      //persist deletes
+      Vue.set(state, 'tasks', taskList);
+      Vue.set(state, 'executionLog', logList);
     }
   },
   getters: {
