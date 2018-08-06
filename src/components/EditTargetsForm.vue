@@ -3,7 +3,8 @@
     <label class="label">Change your targets:</label>
     <div class="horizontalform">
       <p class="control has-icons-left targetbox">
-        <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" />
+        <!-- <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" /> -->
+        <max2dpInput class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model.lazy="target" /> 
         <span class="icon is-small is-left" v-if="linkedEdits">
           <font-awesome-icon :icon="['fas', 'link']" />
         </span>
@@ -48,12 +49,17 @@
 import { uomList, uomListAsSelectOptions } from '../data/uom';
 import { timeframesList, timeframesListAsSelectOptions } from '../data/timeframes';
 import { getStatus } from '../utils/status';
+//import { toTwoDecimalPlaces } from '../utils/filters';
+import max2dpInput from './elements/MaxTwoDecimalPlacesInput';
 
 export default {
   name:'EditTargetsForm',
   props: {
     task: { type: Object, required: true },
     runningTotal: { type: Number }
+  },
+  components: {
+    max2dpInput
   },
   data() {
     return {
@@ -96,6 +102,25 @@ export default {
         this.target = this.target / (uomNew/uomOrig);
         this.step = this.step / (uomNew/uomOrig);
       }
+    },
+    applyEdits() {
+      //validate
+      if (this.uomid.trim() === '') {
+        this.errTarget = true;
+        return;
+      }
+      //update task metrics
+      const updTask = { 
+        ...this.task, 
+        metric: {
+          uomId : this.uomid,
+          timeframe : this.timeframe,
+          measureTarget : this.target,
+          stepSize: this.step,
+        }
+      };
+      this.$store.commit('updateTask', updTask);
+      this.$eventHub.emit('modalcomplete');
     }
   },
   computed: {
@@ -113,25 +138,10 @@ export default {
   },
   mounted() {
     //TODO: all eventHub-mediated signalling with modal should be extract to a mixin.
-    this.$eventHub.on('modalsave', (data) => {
-      //validate
-      if (this.uomid.trim() === '') {
-        this.errTarget = true;
-        return;
+    this.$eventHub.on('modalconfirm', (channel) => {
+      if (channel === 'task.targetsEdited') {
+        this.applyEdits();
       }
-      //update task metrics
-      console.log("saving data", data);
-      const updTask = { 
-        ...this.task, 
-        metric: {
-          uomId : this.uomid,
-          timeframe : this.timeframe,
-          measureTarget : this.target,
-          stepSize: this.step,
-        }
-      };
-      this.$store.commit('updateTask', updTask);
-      this.$eventHub.emit('modalcomplete');
     });
   }
 }

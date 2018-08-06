@@ -26,7 +26,7 @@
         </a>
       </div>
       <div class="task-header-ctrlbtn deleter">
-        <a @click="deleteTask" aria-label="delete">
+        <a @click="$emit('deleteTask')" aria-label="delete">
           <span class="icon"><font-awesome-icon :icon="['fas', 'trash-alt']" /></span>
         </a>
       </div>
@@ -37,7 +37,7 @@
           <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
           <div class="task-meta-cell large">
             <span>target</span>
-            <span @click="editTargets">
+            <span @click="$emit('editTargets')">
               {{ task.metric.measureTarget | toTwoDecimalPlaces }} {{ metric }} {{ timeframe }}
               <a class="icon"><font-awesome-icon :icon="['fas', 'pencil-alt']" /></a>
             </span>
@@ -47,10 +47,6 @@
         </div>
       </div>
     </transition>
-    <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
-      <template slot="title"><span class="task-status textonly" :class="status">{{ status }}</span> {{ tasktitle }}</template>
-      <template :is="modalContent" :task=task :running-total="runningTotal" slot="content"/>
-    </modal>
   </article>
 </template>
 
@@ -61,16 +57,12 @@ import { uomList } from '../data/uom';
 import { getStatus } from '../utils/status.js';
 import { toTwoDecimalPlaces } from '../utils/filters';
 import EditableText from './elements/EditableText';
-import EditTargetsForm from './EditTargetsForm';
-import Modal from './Modal';
 
 
 export default {
   name: 'Task',
   components: {
-    EditableText,
-    Modal,
-    EditTargetsForm
+    EditableText
   },
   props: {
     task: {
@@ -80,19 +72,12 @@ export default {
     currentTimeframe: {
       type: Object,
       required: true
-    },
-    onDelete: {
-      type: Function,
-      required: true
     }
   },
 
   data() {
     return {
-      expanded: false,
-      editingTargets: false,
-      showModal: false,
-      modalContent: ''
+      expanded: false
     };
   },
 
@@ -102,15 +87,6 @@ export default {
 
   methods: {
     // ============================== CRUD methods =========================
-    deleteTask() {
-      this.onDelete(this.task.id);
-      //todo: prompt to delete measures as well.
-    },
-    editTargets() {
-      this.editingTargets = true;
-      this.modalContent = 'EditTargetsForm';
-      this.openPopup();
-    },
     onUpdateDescription(updDescr) {
       if(updDescr !== this.tasktitle ) {
         //update if changed
@@ -135,16 +111,6 @@ export default {
       this.$store.commit('undoExecutionLogByTaskId', this.task.id);
     },
 
-    // ============================ Modal controls ==========================
-    openPopup() {
-      this.showModal = true;
-    },
-    closePopup(){
-      this.modalContent = '';
-      this.showModal = false;
-    },
-
-
     // ===================== UI / UX minor interactions  ====================
     expand() {
       this.expanded = true;
@@ -165,15 +131,12 @@ export default {
     tasktitle() {
       return (this.task.description);
     },
-    executionLog() { //executionLog for THIS task only
+    filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
       if(!this.$store.state.executionLog) return [];
       return this.$store.state.executionLog.filter(execItem => {
-        return (execItem.taskId === this.task.id);
-      });
-    },
-    filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
-      return this.executionLog.filter(execItem => {
-        return moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+        const filtCriterion1 = (execItem.taskId === this.task.id);
+        const filtCriterion2 = moment(execItem.timestamp).isAfter(this.currentTimeframe.start);
+        return filtCriterion1 && filtCriterion2;
       });
     },
     value() {
@@ -208,7 +171,6 @@ export default {
     }
   },
   mounted() {
-
   }
 }
 </script>

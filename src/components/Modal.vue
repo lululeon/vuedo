@@ -7,11 +7,12 @@
         <button class="delete is-medium" @click="$emit('close')" aria-label="close"></button>
       </header>
       <section class="modal-card-body">
-        <slot name="content" />
+        <slot name="content-raw" />
+        <slot name="content-component" />
       </section>
       <footer class="modal-card-foot level">
         <div class="level-right">
-          <button class="button is-primary" @click="$eventHub.emit('modalsave')">Save changes</button>
+          <button class="button is-primary" @click="$eventHub.emit('modalconfirm', channel, taskId)"><slot name="action">OK</slot></button>
           <button class="button" @click="$emit('close')">Cancel</button>
         </div>
       </footer>
@@ -23,7 +24,9 @@
 export default {
   name:'Modal',
   props: {
-    'title': { type: String }
+    'title': { type: String },
+    'taskId': { type: Number },
+    'channel': { type: String, required: true } //specific evt channel on evt hub, for targetting listeners
   },
   mounted() {
     this.$eventHub.on('modalcomplete', () => {
