@@ -4,7 +4,7 @@
     <div class="horizontalform">
       <p class="control has-icons-left targetbox">
         <!-- <input class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model="target" /> -->
-        <max2dpInput class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" :value="target" /> 
+        <max2dpInput class="input" @focus="errTarget=false" :class="{'error': errTarget}" type="text" v-model.lazy="target" /> 
         <span class="icon is-small is-left" v-if="linkedEdits">
           <font-awesome-icon :icon="['fas', 'link']" />
         </span>
@@ -102,24 +102,8 @@ export default {
         this.target = this.target / (uomNew/uomOrig);
         this.step = this.step / (uomNew/uomOrig);
       }
-    }
-  },
-  computed: {
-    uomOptions() {
-      //filter down to similar uoms only:
-      const uomprefix = /(.+:)/.exec(this.uomid)[0];
-      return uomListAsSelectOptions().filter((uom) => uom.value.startsWith(uomprefix));
     },
-    timeframeOptions() {
-      return timeframesListAsSelectOptions();
-    },
-    status() {
-      return getStatus(this.runningTotal, this.target);
-    }
-  },
-  mounted() {
-    //TODO: all eventHub-mediated signalling with modal should be extract to a mixin.
-    this.$eventHub.on('modalsave', () => {
+    applyEdits() {
       //validate
       if (this.uomid.trim() === '') {
         this.errTarget = true;
@@ -137,6 +121,27 @@ export default {
       };
       this.$store.commit('updateTask', updTask);
       this.$eventHub.emit('modalcomplete');
+    }
+  },
+  computed: {
+    uomOptions() {
+      //filter down to similar uoms only:
+      const uomprefix = /(.+:)/.exec(this.uomid)[0];
+      return uomListAsSelectOptions().filter((uom) => uom.value.startsWith(uomprefix));
+    },
+    timeframeOptions() {
+      return timeframesListAsSelectOptions();
+    },
+    status() {
+      return getStatus(this.runningTotal, this.target);
+    }
+  },
+  mounted() {
+    //TODO: all eventHub-mediated signalling with modal should be extract to a mixin.
+    this.$eventHub.on('modalconfirm', (channel) => {
+      if (channel === 'task.targetsEdited') {
+        this.applyEdits();
+      }
     });
   }
 }

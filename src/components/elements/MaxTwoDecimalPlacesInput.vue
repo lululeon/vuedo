@@ -1,5 +1,6 @@
 <template>
   <input
+    ref="inputbox"
     v-bind:value="value"
     v-on:input="updateValue($event.target.value)"
     v-on:focus="selectAll"
@@ -18,20 +19,21 @@ export default({
     }
   },
   mounted() {
-    this.formatValue();
+    this.updateValue(this.value);
   },
   methods: {
     //based on: https://vuejs.org/v2/guide/migration.html#Two-Way-Filters-replaced
-    updateValue(value) {
+    //rem: the @input evt is what helps the parent component bind to this via v-model directive.
+    updateValue(newvalue) {
       //on each keystroke, validate input and round if ness.
-      if (isNaN(value)) {
-        this.$emit('input', 1); //safe fallback
+      if (isNaN(newvalue)) {
+        this.$emit('input', 0); //default
       } else {
-        this.$emit('input', toTwoDecimalPlaces(value));
+        this.$emit('input', toTwoDecimalPlaces(newvalue));
       }
     },
     formatValue() {
-      this.$refs.input.value = toTwoDecimalPlaces(this.value)
+      this.$refs.inputbox.value = toTwoDecimalPlaces(this.value);
     },
     selectAll: function (event) {
       // Workaround for Safari bug

@@ -26,7 +26,7 @@
         </a>
       </div>
       <div class="task-header-ctrlbtn deleter">
-        <a @click="deleteTask" aria-label="delete">
+        <a @click="$emit('deleteTask')" aria-label="delete">
           <span class="icon"><font-awesome-icon :icon="['fas', 'trash-alt']" /></span>
         </a>
       </div>
@@ -37,7 +37,7 @@
           <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
           <div class="task-meta-cell large">
             <span>target</span>
-            <span @click="editTargets">
+            <span @click="$emit('editTargets')">
               {{ task.metric.measureTarget | toTwoDecimalPlaces }} {{ metric }} {{ timeframe }}
               <a class="icon"><font-awesome-icon :icon="['fas', 'pencil-alt']" /></a>
             </span>
@@ -47,11 +47,6 @@
         </div>
       </div>
     </transition>
-    <modal :class="{'is-active': showModal}" @close="closePopup" v-if="showModal">
-      <template slot="title"><span class="task-status textonly" :class="status">{{ status }}</span> {{ tasktitle }}</template>
-      <template slot="content-raw">{{ modalContentRaw }}</template>
-      <template :is="modalContentComponent" :task=task :running-total="runningTotal" slot="content-component"/>
-    </modal>
   </article>
 </template>
 
@@ -62,16 +57,12 @@ import { uomList } from '../data/uom';
 import { getStatus } from '../utils/status.js';
 import { toTwoDecimalPlaces } from '../utils/filters';
 import EditableText from './elements/EditableText';
-import EditTargetsForm from './EditTargetsForm';
-import Modal from './Modal';
 
 
 export default {
   name: 'Task',
   components: {
-    EditableText,
-    Modal,
-    EditTargetsForm
+    EditableText
   },
   props: {
     task: {
@@ -81,20 +72,12 @@ export default {
     currentTimeframe: {
       type: Object,
       required: true
-    },
-    onDelete: {
-      type: Function,
-      required: true
     }
   },
 
   data() {
     return {
-      expanded: false,
-      showModal: false,
-      modalContentComponent: '',
-      modalContentRaw: '',
-      modalActionLabel: 'OK'
+      expanded: false
     };
   },
 
@@ -104,19 +87,6 @@ export default {
 
   methods: {
     // ============================== CRUD methods =========================
-    deleteTask() {
-      this.modalContentComponent = '',
-      this.modalContentRaw = `Are you sure you want to delete this task including all of the logged measures for this task?`;
-      this.modalActionLabel = "Confirm";
-      this.openPopup();
-      //this.onDelete(this.task.id);
-    },
-    editTargets() {
-      this.modalContentComponent = 'EditTargetsForm';
-      this.modalContentRaw = '';
-      this.modalActionLabel = 'Save Edits';
-      this.openPopup();
-    },
     onUpdateDescription(updDescr) {
       if(updDescr !== this.tasktitle ) {
         //update if changed
@@ -140,17 +110,6 @@ export default {
       }
       this.$store.commit('undoExecutionLogByTaskId', this.task.id);
     },
-
-    // ============================ Modal controls ==========================
-    openPopup() {
-      this.showModal = true;
-    },
-    closePopup(){
-      this.modalContentComponent = '';
-      this.modalActionLabel = 'OK';
-      this.showModal = false;
-    },
-
 
     // ===================== UI / UX minor interactions  ====================
     expand() {
@@ -212,7 +171,6 @@ export default {
     }
   },
   mounted() {
-
   }
 }
 </script>

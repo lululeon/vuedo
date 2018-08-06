@@ -39,8 +39,10 @@
         :key="task.id" 
         :task="task"
         :currentTimeframe="currentTimeframes[task.metric.timeframe]"
-        :onDelete="deleteTask" />
+        @editTargets="BeginEditTargets(task)"
+        @deleteTask="BeginDeleteTask(task)" />
     </transition-group>
+    <TaskModal :modal-type="modalType" :task="modalTask" @close="closePopup" :showModal="showModal"/>
   </div>
 </template>
 
@@ -53,14 +55,16 @@ import InputForm from './InputForm';
 import UploadWidget from './UploadWidget';
 import EditableText from './elements/EditableText';
 import { timeframesList } from '../data/timeframes';
+import TaskModal from './TaskModal';
 
 export default {
   name: 'TaskList',
   components: {
-      Task,
-      InputForm,
-      UploadWidget,
-      EditableText
+    Task,
+    InputForm,
+    UploadWidget,
+    EditableText,
+    TaskModal
   },
   data() {
     //in components, you must RETURN the data object
@@ -68,6 +72,9 @@ export default {
       nextId: 1,
       showInputForm:false,
       showUploadWidget:false,
+      showModal: false,
+      modalType: '',
+      modalTask: {}, //the task for which the modal dialog is opened
       currentTimeframes: {}
     }
   },
@@ -128,7 +135,25 @@ export default {
 
       //set up the clock!
       //setInterval(this.checkTime, 3000); //every 3 secs
-    }
+    },
+
+    //========================= Task Modal interactions ======================
+    BeginDeleteTask(modalTask) {
+      this.modalTask = modalTask;
+      this.modalType = 'deleteTask',
+      this.openPopup();
+    },
+    BeginEditTargets(modalTask) {
+      this.modalTask = modalTask;
+      this.modalType = 'editTargets',
+      this.openPopup();
+    },
+    openPopup() {
+      this.showModal = true;
+    },
+    closePopup(){
+      this.showModal = false;
+    },
   },
 
   created() {
