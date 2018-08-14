@@ -2,10 +2,19 @@
   <div id="app">
     <div class="container">
       <div class="content">
-        <h1>Vue<span class="has-text-info">do</span></h1>
-        <p class="slogan">The magical art of execution | <span class="curdate">{{ currentDay }}</span> </p>
+        <Navbar/>
+        <div class="tabs">
+          <ul>
+            <li :class="{'is-active': selectedTab === 'tasks'}" @click="selectTab('tasks')"><router-link to="/">Tasks</router-link></li>
+            <li :class="{'is-active': selectedTab === 'domains'}" @click="selectTab('domains')"><router-link to="domains">Domains</router-link></li>
+            <li :class="{'is-active': selectedTab === 'wins'}" @click="selectTab('wins')"><router-link to="wins">Wins</router-link></li>
+            <li :class="{'is-active': selectedTab === 'analytics'}" @click="selectTab('analytics')"><router-link to="analytics">Analytics</router-link></li>
+          </ul>
+        </div>
         <div id="task-list">
-          <TaskList/>
+          <router-view>
+            <TaskList/>
+          </router-view>
         </div>
       </div>
     </div>
@@ -14,12 +23,8 @@
 
 <script>
 import Vue from 'vue';
-import moment from 'moment';
-
-// >>> global event bus:
 import EventHub from 'vue-event-hub';
 Vue.use(EventHub);
-// <<<
 
 // >>> fontawesome setup for vue.js
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
@@ -29,28 +34,28 @@ fontawesome.library.add(solid); // Use any icon from the Solid style
 Vue.component('font-awesome-icon', FontAwesomeIcon); // Use the icon component anywhere in the app
 // <<<
 
-// >>> vuex
-import { store } from '@/store/store';
-// <<<
-
-import TaskList from './components/TaskList.vue';
+import { store } from '@/store/store'; //vuex
+import TaskList from './components/TaskList';
+import Navbar from './components/Navbar';
 
 export default {
   name: 'app',
   store,
   components: {
-    TaskList
+    TaskList,
+    Navbar
   },
   data() {
     return {
-      dayTemplateType: "Daily"
+      dayTemplateType: "Daily",
+      selectedTab: 'tasks'
     }
   },
   methods: {
-  },
-  computed: {
-    currentDay() {
-      return moment().format("MMM Do YYYY");
+    selectTab(tabName) {
+      this.selectedTab = tabName;
+
+      //console.log(this.selectedTab); //eslint-disable-line
     }
   }
 }
@@ -69,4 +74,19 @@ $family-primary: 'Nunito';
 .curdate, .template-type {
   font-weight: bold;
 }
+</style>
+
+<style scoped>
+/* override weird bulma gaps */
+.tabs ul {
+  margin-left: 0; 
+}
+.content li + li {
+  margin-top: 0;
+}
+/*
+.tabs a {
+  margin-bottom: -3px;
+}
+*/
 </style>

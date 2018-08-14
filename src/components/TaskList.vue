@@ -2,7 +2,6 @@
   <div>
     <div class="level">
       <div class="level-left">
-        <EditableText :content="username" @updated="updateUsername" class="username"/>
         <button class="button level-item is-info" @click="loadTasks">
           <span class="icon">
             <font-awesome-icon :icon="['fas', 'file']" />
@@ -53,7 +52,6 @@ import { mapState } from 'vuex';
 import Task from './Task.vue';
 import InputForm from './InputForm';
 import UploadWidget from './UploadWidget';
-import EditableText from './elements/EditableText';
 import { timeframesList } from '../data/timeframes';
 import TaskModal from './TaskModal';
 
@@ -63,7 +61,6 @@ export default {
     Task,
     InputForm,
     UploadWidget,
-    EditableText,
     TaskModal
   },
   data() {
@@ -100,12 +97,6 @@ export default {
     },
     deleteTask(taskId) {
       this.$store.commit('deleteTask', taskId);
-    },
-    updateUsername(updName) {
-      //check changed and valid, then:
-      if (updName === this.username) return; //nothing changed
-      if (updName.trim() === '') return; //not valid
-      this.$store.commit('updateUsername', updName);
     },
     updateTimeframes() {
       const dayStart = moment().startOf('day');
