@@ -4,11 +4,9 @@
       <EditableText class="task-header-title" :content="tasktitle" @updated="onUpdateDescription" />
       <div class="header-group">
         <transition name="latepop" tag="span">
-          <Timer v-if="isTimeable && !expanded"/>
-        </transition>
-        <transition name="latepop" tag="span">
           <span  class="task-status" :class="status" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
         </transition>
+        <Timer v-if="isTimeable" @logtime="logElapsedTime"/>
       </div>
       <div class="header-group">
         <div class="task-header-ctrlbtn">
@@ -51,8 +49,7 @@
           </div>
           <div class="task-meta-cell large"><span>step size</span><span>{{ task.metric.stepSize | toTwoDecimalPlaces }} {{ stepSizeMetricLabel }}</span></div>
           <div class="task-value-cell" :class="status" >
-            <span v-if="!isTimeable">running total</span>
-            <Timer v-else />
+            <span>running total</span>
             <span>{{ runningTotal | toTwoDecimalPlaces }} {{ metric }} {{ thisTimeframeText }} </span>
           </div>
         </div>
@@ -113,7 +110,8 @@ export default {
       const taskId = this.task.id;
       const timestamp = moment().format();
       const value = this.task.metric.stepSize * uomList[this.task.metric.uomId].uomMultiplier; //stepSize x metric.uomMultiplier
-      const targetReached = (value >= this.task.measureTarget) ? true : false;
+      //const targetReached = (value >= this.task.measureTarget) ? true : false;
+      const targetReached = (value >= this.task.metric.measureTarget) ? true : false;
       const logItem = { taskId, timestamp, value, targetReached };
       this.$store.commit('newExecutionLog', logItem);
     },
@@ -122,6 +120,17 @@ export default {
         return;
       }
       this.$store.commit('undoExecutionLogByTaskId', this.task.id);
+    },
+    logElapsedTime(elapsedTime) {
+      const taskId = this.task.id;
+      const timestamp = moment().format();
+      //standard uom for time-based metrics is hour, so:
+      let { elapsedHours, elapsedMinutes, elapsedSeconds } = elapsedTime;
+      const totalHours = elapsedHours + (elapsedMinutes/60) + (elapsedSeconds/3600);
+      const targetHours = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier; //amt x metric.uomMultiplier
+      const targetReached = (totalHours >= targetHours) ? true : false;
+      const logItem = { taskId, timestamp, value:totalHours, targetReached };
+      this.$store.commit('newExecutionLog', logItem);
     },
 
     // ===================== UI / UX minor interactions  ====================
@@ -301,6 +310,7 @@ export default {
     margin:0;
     border-radius: 0;
   }
+  /*
   @media screen and (max-width: 460px) {
     .timer {
       font-size: 1rem;
@@ -312,6 +322,7 @@ export default {
       padding: 0.15em;
     }
   }
+  */
 }
 .task-meta-cell, .task-value-cell {
   text-align: center;
