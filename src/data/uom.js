@@ -91,7 +91,37 @@ export const uomListAsSelectOptions = function() {
   return options;
 };
 
+export const getMetricPrefix = function(uomId) {
+  if((typeof uomId) === 'string') {
+    const prefix = uomId.substr(0, uomId.indexOf(':') === -1 ? uomId.length : uomId.indexOf(':'));
+    return prefix;
+  } else {
+    return '';
+  }
+}
+
+export const isTimeMetric = function(uomId) {
+  return (getMetricPrefix(uomId) === 'time');
+}
+
+export const isDistanceMetric = function(uomId) {
+  return (getMetricPrefix(uomId) === 'distance');
+}
+
+export const isMonetaryMetric = function(uomId) {
+  return (getMetricPrefix(uomId) === 'money');
+}
+
+export const isDimensionlessMetric = function(uomId) {
+  return (getMetricPrefix(uomId) === 'money');
+}
+
 export default {
   uomList,
-  uomListAsSelectOptions
+  uomListAsSelectOptions,
+  getMetricPrefix,
+  isTimeMetric,
+  isDistanceMetric,
+  isMonetaryMetric,
+  isDimensionlessMetric
 }
