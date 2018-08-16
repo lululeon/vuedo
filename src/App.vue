@@ -54,8 +54,6 @@ export default {
   methods: {
     selectTab(tabName) {
       this.selectedTab = tabName;
-
-      //console.log(this.selectedTab); //eslint-disable-line
     }
   }
 }
@@ -84,9 +82,4 @@ $family-primary: 'Nunito';
 .content li + li {
   margin-top: 0;
 }
-/*
-.tabs a {
-  margin-bottom: -3px;
-}
-*/
 </style>
