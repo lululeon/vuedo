@@ -10,7 +10,7 @@
       </pre>
     </div>
     <div class="level-right">
-      <button class="level-item button" @click="$emit('hideUploadWidget')">
+      <button class="level-item button" @click="$eventHub.emit('hideUploadWidget')">
           <span>Cancel</span>
       </button>
       <button class="level-item button is-info" @click="doUpload">
@@ -70,7 +70,8 @@ export default {
     },
     doUpload() {
       const jsonObj = JSON.parse(this.fileContents);
-      this.$emit('uploadReady', jsonObj);
+      this.$store.commit('initialize', jsonObj);
+      this.$router.push('/tasks');
     }
   }
 }

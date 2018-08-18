@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-transparent is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <router-link to="/">
         <h1 class="navbar-item logotext">Vue<span class="has-text-info">do</span></h1>
@@ -12,38 +12,27 @@
     </div>
     <div class="navbar-menu">
       <div class="navbar-start">
-        <span class="navbar-item curdate">{{ currentDay }}</span>
         <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="/documentation/overview/start/">
-            Docs
-          </a>
+          <router-link class="navbar-item" to="/tasks">Tasks</router-link>
           <div class="navbar-dropdown is-boxed">
-            <a class="navbar-item" href="/documentation/overview/start/">
-              Overview
-            </a>
-            <a class="navbar-item" href="https://bulma.io/documentation/modifiers/syntax/">
-              Modifiers
-            </a>
-            <a class="navbar-item" href="https://bulma.io/documentation/columns/basics/">
-              Columns
-            </a>
-            <a class="navbar-item" href="https://bulma.io/documentation/layout/container/">
-              Layout
-            </a>
-            <a class="navbar-item" href="https://bulma.io/documentation/form/general/">
-              Form
-            </a>
+            <router-link class="navbar-item" to="/tasks">Current Tasks</router-link>
+            <router-link class="navbar-item" to="/tasks/add">Add a task</router-link>
             <hr class="navbar-divider">
-            <a class="navbar-item" href="https://bulma.io/documentation/elements/box/">
-              Elements
+            <router-link class="navbar-item" to="/tasks/dataport">Import/Export Data</router-link>
+            <!--
+            <a class="navbar-item">
+              Export/Download Tasks
             </a>
-            <a class="navbar-item is-active" href="https://bulma.io/documentation/components/breadcrumb/">
-              Components
-            </a>
+            -->
           </div>
         </div>
+        <router-link class="navbar-item" to="/logs">Raw Logs</router-link>
+        <router-link class="navbar-item" to="/spheres">Spheres</router-link>
+        <router-link class="navbar-item" to="/wins">Wins</router-link>
+        <router-link class="navbar-item" to="/analytics">Analytics</router-link>
       </div>
       <div class="navbar-end">
+        <span class="navbar-item">{{ currentDay }}</span>
         <EditableText :content="username" @updated="updateUsername" class="navbar-item username"/>
       </div>
     </div>
@@ -51,8 +40,8 @@
 </template>
 
 <script>
-import moment from 'moment';
 import { mapState } from 'vuex';
+import moment from 'moment';
 import EditableText from './elements/EditableText';
 
 
@@ -78,12 +67,23 @@ export default {
 }
 </script>
 
-<style>
-.navbar-item.logotext {
-  font-size: 3rem;
+<style lang="scss">
+nav.navbar.is-transparent.is-fixed-top {
+    border-bottom: 1px solid #eee;
+    box-shadow: 2px 2px 3px 0px #eee;
 }
-.navbar-item.username {
-  font-size: 1.5rem;
-  font-weight: 700;
+.navbar-menu {
+    margin-top: 0.5em;
+}
+.navbar-item {
+  &.logotext {
+    font-size: 2em;
+    font-weight: 700;
+    margin-left: 36px; /*bulma fluid container margins are this */
+    margin-bottom: 0;
+  }
+  &.username {
+    font-weight: 700;
+  }
 }
 </style>

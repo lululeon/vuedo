@@ -1,45 +1,59 @@
 <template>
   <div>
-    <div class="level">
-      <div class="level-left">
-        <button class="button level-item is-info" @click="loadTasks">
-          <span class="icon">
-            <font-awesome-icon :icon="['fas', 'file']" />
-          </span>
-          <span>Upload your own tasks!</span>
-        </button>
-        <button class="button level-item is-primary" @click="addTask">
-          <span class="icon">
-            <font-awesome-icon :icon="['fas', 'plus']" />
-          </span>
-          <span>Add task</span>
-        </button>
-        <a id="downloadlink" download="vuedo.json" :href="downloadDataset">
-          <button class="button level-item is-warning">
-            <span class="icon">
-              <font-awesome-icon :icon="['fas', 'download']" />
-            </span>
-            <span>Download your data</span>
-          </button>
-        </a>
-      </div>
+    <!--
+    <div class="tabs">
+      <ul>
+        <li :class="{'is-active': selectedTab === 'tasks'}" @click="selectTab('tasks')"><router-link to="/tasks/current">Tasks</router-link></li>
+        <li :class="{'is-active': selectedTab === 'logs'}" @click="selectTab('logs')"><router-link to="/tasks/logs">Raw Logs</router-link></li>
+      </ul>
     </div>
-    <UploadWidget 
-      v-if="showUploadWidget"
-      @hideUploadWidget="hideUploadWidget"
-      @uploadReady="populateDataStore" />
-    <InputForm
-      :nextId="nextId" 
-      @saveNewTask="saveTask"
-      @hideInputForm="hideInputForm" 
-      v-if="showInputForm"/>
+    -->
+    <article class="notification tile is-child" v-if="showEmptyListNotif">
+      <p class="title">Get going!</p>
+      <p class="subtitle">You don't seem to have anything to do!! Let's change that:</p>
+      <div class="level">
+        <div class="level-left">
+          <button class="button level-item is-info" @click="addTask">
+            <span class="icon">
+              <font-awesome-icon :icon="['fas', 'plus']" />
+            </span>
+            <span>Add a task!</span>
+          </button>
+          <button class="button level-item" @click="loadTasks">
+            <span class="icon">
+              <font-awesome-icon :icon="['fas', 'file']" />
+            </span>
+            <span>Upload tasks from a file</span>
+          </button>
+        </div>
+      </div>
+    </article>
+    <div class="level-left" v-if="!showEmptyListNotif && showActionIcons">
+      <button class="button level-item is-small is-info" @click="addTask">
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'plus']" />
+        </span>
+      </button>
+      <button class="button level-item is-small is-info" @click="loadTasks">
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'file']" />
+        </span>
+      </button>
+      <a id="downloadlink" download="vuedo.json" :href="downloadDataset">
+        <button class="button level-item is-small is-info">
+          <span class="icon">
+            <font-awesome-icon :icon="['fas', 'download']" />
+          </span>
+        </button>
+      </a>
+    </div>
     <transition-group name="taskpop" tag="div" class="tasklist">
       <Task v-for="task in tasks" 
         :key="task.id" 
         :task="task"
         :currentTimeframe="currentTimeframes[task.metric.timeframe]"
         @editTargets="BeginEditTargets(task)"
-        @deleteTask="BeginDeleteTask(task)" />
+        @deleteTask="BeginDeleteTask(task)"/>
     </transition-group>
     <TaskModal :modal-type="modalType" :task="modalTask" @close="closePopup" :showModal="showModal"/>
   </div>
@@ -50,8 +64,6 @@ import moment from 'moment';
 import jsonbeautify from 'json-beautify';
 import { mapState } from 'vuex';
 import Task from './Task.vue';
-import InputForm from './InputForm';
-import UploadWidget from './UploadWidget';
 import { timeframesList } from '../data/timeframes';
 import TaskModal from './TaskModal';
 
@@ -59,41 +71,25 @@ export default {
   name: 'TaskList',
   components: {
     Task,
-    InputForm,
-    UploadWidget,
     TaskModal
   },
   data() {
     //in components, you must RETURN the data object
     return {
-      nextId: 1,
-      showInputForm:false,
-      showUploadWidget:false,
       showModal: false,
       modalType: '',
       modalTask: {}, //the task for which the modal dialog is opened
       currentTimeframes: {}
     }
   },
-
+  mounted() {
+  },
   methods: {
     addTask() {
-      this.showInputForm = true;
-      this.hideUploadWidget();
+      this.$router.push('tasks/add');
     },
     loadTasks() {
-      this.showUploadWidget = true;
-      this.hideInputForm();
-    },
-    hideInputForm() {
-      this.showInputForm = false;
-    },
-    hideUploadWidget() {
-      this.showUploadWidget = false;
-    },
-    saveTask(taskToSave) {
-      this.tasks.push(taskToSave);
-      this.nextId += 1;
+      this.$router.push('tasks/dataport');
     },
     deleteTask(taskId) {
       this.$store.commit('deleteTask', taskId);
@@ -114,20 +110,6 @@ export default {
       timeframes['tf:monthly'].end = monthEnd;
       this.currentTimeframes = timeframes;     
     },
-    populateDataStore(uploadDataObj) {
-      //load the data: TODO: load to store
-      this.$store.commit('initialize', uploadDataObj);
-      this.hideUploadWidget();
-
-      //TODO: fix with proper uuids or somesuch
-      this.nextId = 1 + this.tasks.reduce((accumulator, nextItem) => {
-        return Math.max(nextItem.id, accumulator);
-      }, 0);
-
-      //set up the clock!
-      //setInterval(this.checkTime, 3000); //every 3 secs
-    },
-
     //========================= Task Modal interactions ======================
     BeginDeleteTask(modalTask) {
       this.modalTask = modalTask;
@@ -146,16 +128,23 @@ export default {
       this.showModal = false;
     },
   },
-
   created() {
     this.updateTimeframes();
   },
-
-  mounted() {
-  },
-
   computed: {
     ...mapState(['username','tasks','goals','executionLog','sentimentLog']),
+    showActionIcons() {
+      //show only when there are no tasks AND user is not in the middle of adding or uploading tasks.
+      const path = this.$route.path;
+      if ((path !== '/tasks/add') && (path !== '/tasks/dataport')) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    showEmptyListNotif(){
+      return (this.showActionIcons && this.tasks.length < 1);
+    },
     downloadDataset() {
       if(!this.tasks) return '';
 
@@ -177,9 +166,14 @@ export default {
 </script>
 
 <style scoped>
-.username {
-  font-size: 2em;
+/* >>> bulma overrides */
+.title {
+  font-size: 1.2rem;
 }
+.subtitle {
+  font-size: 1.1rem;
+}
+/* <<< end bulma override */
 .tasklist {
   display: flex;
   flex-direction: column-reverse;
@@ -214,5 +208,4 @@ export default {
     opacity: 0;
   }
 }
-
 </style>

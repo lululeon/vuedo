@@ -39,7 +39,10 @@
     <transition name="slide-down">
       <div class="task-body" v-if="expanded">
         <div class="task-meta-cells">
-          <div class="task-meta-cell small"><span>id</span><span>{{ task.id }}</span></div>
+          <div class="task-meta-cell small">
+            <span>id</span>
+            <span><router-link :to="measuresUrl">{{ task.id | truncateUUID }}</router-link></span>
+          </div>
           <div class="task-meta-cell large">
             <span>target</span>
             <span @click="$emit('editTargets')">
@@ -92,7 +95,10 @@ export default {
   },
 
   filters: {
-    toTwoDecimalPlaces
+    toTwoDecimalPlaces,
+    truncateUUID(uuidstr) {
+      return uuidstr.substr(0, uuidstr.indexOf('-'));
+    }
   },
 
   methods: {
@@ -152,6 +158,9 @@ export default {
   computed: {
     tasktitle() {
       return (this.task.description);
+    },
+    measuresUrl(){
+      return `/logs/${this.task.id}`;
     },
     filteredLogs() { //executionLog for THIS task only, filtered down to current timeframe
       if(!this.$store.state.executionLog) return [];
@@ -376,13 +385,13 @@ export default {
   }
   span {
     padding: 0.5rem;
-    &>a {
+    &>a.icon {
       opacity: 0;
       color: $grey-light;
     }
     &:hover {
       cursor: pointer;
-      &>a {
+      &>a.icon {
         opacity: 0.8;
       }
     }
