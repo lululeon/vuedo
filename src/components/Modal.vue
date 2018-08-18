@@ -25,7 +25,7 @@ export default {
   name:'Modal',
   props: {
     'title': { type: String },
-    'taskId': { type: Number },
+    'taskId': { type: String },
     'channel': { type: String, required: true } //specific evt channel on evt hub, for targetting listeners
   },
   mounted() {

@@ -1,22 +1,9 @@
 <template>
   <div id="app">
-    <div class="container">
-      <div class="content">
-        <Navbar/>
-        <div class="tabs">
-          <ul>
-            <li :class="{'is-active': selectedTab === 'tasks'}" @click="selectTab('tasks')"><router-link to="/">Tasks</router-link></li>
-            <li :class="{'is-active': selectedTab === 'domains'}" @click="selectTab('domains')"><router-link to="domains">Domains</router-link></li>
-            <li :class="{'is-active': selectedTab === 'wins'}" @click="selectTab('wins')"><router-link to="wins">Wins</router-link></li>
-            <li :class="{'is-active': selectedTab === 'analytics'}" @click="selectTab('analytics')"><router-link to="analytics">Analytics</router-link></li>
-          </ul>
-        </div>
-        <div id="task-list">
-          <router-view>
-            <TaskList/>
-          </router-view>
-        </div>
-      </div>
+    <Navbar/>
+    <div class="view-wrapper container is-fluid">
+      <router-view>
+      </router-view>
     </div>
   </div>
 </template>
@@ -35,14 +22,12 @@ Vue.component('font-awesome-icon', FontAwesomeIcon); // Use the icon component a
 // <<<
 
 import { store } from '@/store/store'; //vuex
-import TaskList from './components/TaskList';
 import Navbar from './components/Navbar';
 
 export default {
   name: 'app',
   store,
   components: {
-    TaskList,
     Navbar
   },
   data() {
@@ -59,27 +44,7 @@ export default {
 }
 </script>
 
-<style lang="sass">
-@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
-$family-primary: 'Nunito';
-@import '../node_modules/bulma/bulma.sass';
+<style lang="scss">
+@import '@/css/main.scss';
 </style>
 
-<style>
-.container {
-  padding: 3rem;
-}
-.curdate, .template-type {
-  font-weight: bold;
-}
-</style>
-
-<style scoped>
-/* override weird bulma gaps */
-.tabs ul {
-  margin-left: 0; 
-}
-.content li + li {
-  margin-top: 0;
-}
-</style>

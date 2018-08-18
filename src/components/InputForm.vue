@@ -54,7 +54,7 @@
             </div>
         </div>
         <div class="card-content level-right">
-            <button class="level-item button" @click="$emit('hideInputForm')">
+            <button class="level-item button" @click="$eventHub.emit('hideInputForm')">
                 <span>Cancel task addition</span>
             </button>
             <button class="level-item button is-info" @click="saveTask">
@@ -112,9 +112,7 @@ export default {
         this.showStepSizeErr = true;
         return;
       }
-
-      this.$emit('saveNewTask', { 
-        id: this.newtask.id,
+      const taskToSave = { 
         description: this.newtask.description,
         count: this.newtask.count,
         metric: {
@@ -123,7 +121,8 @@ export default {
           measureTarget: target,
           stepSize: stepsz
         }
-      });
+      };
+      this.$store.commit('addTask', taskToSave);
       this.clearInputErrors();
     },
     clearInputErrors() {

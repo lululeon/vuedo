@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import uuidv1 from 'uuid/v1';
 Vue.use(Vuex);
 
 
@@ -46,6 +47,11 @@ export const store = new Vuex.Store({
     },
     updateUsername(state, updatedName) {
       Vue.set(state, 'username', updatedName);
+    },
+    addTask(state, newTask) {
+      const tasks = state.tasks;
+      const finalizedTask = Object.assign({}, newTask, {id: uuidv1()});
+      Vue.set(state, 'tasks', [...tasks, finalizedTask]);
     },
     updateTask(state, updatedTask) {
       let tasks = state.tasks;
