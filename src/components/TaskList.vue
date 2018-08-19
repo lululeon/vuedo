@@ -28,19 +28,19 @@
         </div>
       </div>
     </article>
-    <div class="level-left" v-if="!showEmptyListNotif && showActionIcons">
-      <button class="button level-item is-small is-info" @click="addTask">
+    <div class="iconbar" v-if="!showEmptyListNotif && showActionIcons">
+      <button class="button is-small is-info" @click="addTask">
         <span class="icon">
           <font-awesome-icon :icon="['fas', 'plus']" />
         </span>
       </button>
-      <button class="button level-item is-small is-info" @click="loadTasks">
+      <button class="button is-small is-info" @click="loadTasks">
         <span class="icon">
           <font-awesome-icon :icon="['fas', 'file']" />
         </span>
       </button>
       <a id="downloadlink" download="vuedo.json" :href="downloadDataset">
-        <button class="button level-item is-small is-info">
+        <button class="button is-small is-info">
           <span class="icon">
             <font-awesome-icon :icon="['fas', 'download']" />
           </span>
@@ -165,7 +165,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 /* >>> bulma overrides */
 .title {
   font-size: 1.2rem;
@@ -174,6 +174,13 @@ export default {
   font-size: 1.1rem;
 }
 /* <<< end bulma override */
+.iconbar {
+  display: flex;
+  flex-wrap: nowrap;
+  .button:not(:last-child) {
+    margin-right: 0.25em;
+  }
+}
 .tasklist {
   display: flex;
   flex-direction: column-reverse;

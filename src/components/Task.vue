@@ -239,6 +239,7 @@ export default {
     }
 
     @media screen and (max-width: 450px) {
+      width: 100%;
       .timer, .task-status {
         width: 100%;
       }
