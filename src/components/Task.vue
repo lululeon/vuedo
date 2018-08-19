@@ -1,7 +1,7 @@
 <template>
   <article class="task">
     <header class="task-header">
-      <EditableText class="task-header-title" :content="tasktitle" @updated="onUpdateDescription" />
+      <EditableText class="task-header-title" :content="tasktitle" @updated="updateDescription" />
       <div class="header-group">
         <transition name="latepop" tag="span">
           <span  class="task-status" :class="status" v-if="!expanded">{{ runningTotal }} {{ metric }} {{ thisTimeframeText }} </span>
@@ -10,32 +10,37 @@
       </div>
       <div class="header-group">
         <div class="task-header-ctrlbtn">
-          <a @click="decrement" aria-label="decrement count">
-            <span class="icon"><font-awesome-icon :icon="['fas', 'minus']" /></span>
+          <a @click="increment" aria-label="increment count">
+            <span class="icon has-text-success"><font-awesome-icon :icon="['far', 'check-circle']" size="2x"/></span>
           </a>
         </div>
         <div class="task-header-ctrlbtn">
-          <a @click="increment" aria-label="increment count">
-            <span class="icon"><font-awesome-icon :icon="['fas', 'plus']" /></span>
+          <a @click="decrement" aria-label="decrement count">
+            <span class="icon has-text-warning"><font-awesome-icon :icon="['far', 'times-circle']" size="2x"/></span>
           </a>
         </div>
-        <div class="task-header-ctrlbtn expander" v-if="!expanded">
-          <a @click="expand" aria-label="expand">
-            <span class="icon"><font-awesome-icon :icon="['fas', 'caret-up']" /></span>
+        <div class="task-header-ctrlbtn">
+          <a @click="jottingNotes = !jottingNotes" aria-label="Add task note">
+            <span class="icon has-text-info"><font-awesome-icon :icon="['far', 'comment-alt']" size="2x"/></span>
           </a>
         </div>
-        <div class="task-header-ctrlbtn expander" v-if="expanded">
-          <a @click="collapse" aria-label="collapse">
-            <span class="icon"><font-awesome-icon :icon="['fas', 'caret-down']" /></span>
+        <div class="task-header-ctrlbtn">
+          <a @click="toggleExpandAll" aria-label="expand">
+            <span class="icon has-text-info"><font-awesome-icon :icon="['fas', 'info-circle']" size="2x"/></span>
           </a>
         </div>
         <div class="task-header-ctrlbtn deleter">
           <a @click="$emit('deleteTask')" aria-label="delete">
-            <span class="icon"><font-awesome-icon :icon="['fas', 'trash-alt']" /></span>
+            <span class="icon has-text-danger"><font-awesome-icon :icon="['fas', 'trash-alt']" size="2x" /></span>
           </a>
         </div>
       </div>
     </header>
+    <transition name="slide-down">
+      <div class="task-note" v-if="jottingNotes">
+        <editable-text :content="activityNote" @updated="updateNote"/>
+      </div>
+    </transition>
     <transition name="slide-down">
       <div class="task-body" v-if="expanded">
         <div class="task-meta-cells">
@@ -70,6 +75,7 @@ import { toTwoDecimalPlaces } from '../utils/filters';
 import EditableText from './elements/EditableText';
 import Timer from './Timer';
 
+const defaultNote = 'Enter a short description of your current activity';
 
 export default {
   name: 'Task',
@@ -90,7 +96,9 @@ export default {
 
   data() {
     return {
-      expanded: false
+      expanded: false,
+      activityNote: defaultNote,
+      jottingNotes: false
     };
   },
 
@@ -103,13 +111,16 @@ export default {
 
   methods: {
     // ============================== CRUD methods =========================
-    onUpdateDescription(updDescr) {
+    updateDescription(updDescr) {
       if(updDescr !== this.tasktitle ) {
         //update if changed
         const updTask = this.task;
         updTask.description = updDescr;
         this.$store.commit('updateTask', updTask);
       }
+    },
+    updateNote(note) {
+      this.activityNote = note;
     },
     //task tracking / atomic modifiers
     increment() {
@@ -118,14 +129,10 @@ export default {
       const value = this.task.metric.stepSize * uomList[this.task.metric.uomId].uomMultiplier; //stepSize x metric.uomMultiplier
       //const targetReached = (value >= this.task.measureTarget) ? true : false;
       const targetReached = (value >= this.task.metric.measureTarget) ? true : false;
-      const logItem = { taskId, timestamp, value, targetReached };
+      const note = (this.activityNote === defaultNote) ? '' : this.activityNote;
+      const logItem = { taskId, timestamp, value, targetReached, note };
       this.$store.commit('newExecutionLog', logItem);
-    },
-    decrement() {
-      if(this.runningTotal === 0) {
-        return;
-      }
-      this.$store.commit('undoExecutionLogByTaskId', this.task.id);
+      this.activityNote = defaultNote;
     },
     logElapsedTime(elapsedTime) {
       const taskId = this.task.id;
@@ -135,16 +142,24 @@ export default {
       const totalHours = elapsedHours + (elapsedMinutes/60) + (elapsedSeconds/3600);
       const targetHours = this.task.metric.measureTarget * uomList[this.task.metric.uomId].uomMultiplier; //amt x metric.uomMultiplier
       const targetReached = (totalHours >= targetHours) ? true : false;
-      const logItem = { taskId, timestamp, value:totalHours, targetReached };
+      const note = (this.activityNote === defaultNote) ? '' : this.activityNote;
+      const logItem = { taskId, timestamp, value:totalHours, targetReached, note };
       this.$store.commit('newExecutionLog', logItem);
+      this.activityNote = defaultNote;
     },
-
-    // ===================== UI / UX minor interactions  ====================
-    expand() {
-      this.expanded = true;
+    decrement() {
+      if(this.runningTotal === 0) {
+        return;
+      }
+      this.$store.commit('undoExecutionLogByTaskId', this.task.id);
     },
-    collapse() {
-      this.expanded = false;
+    toggleExpandAll() {
+      this.expanded = !this.expanded;
+      if(this.expanded === true) {
+        this.jottingNotes = true;
+      } else {
+        this.jottingNotes = false;
+      }
     },
 
     // ======================== Miscellaneous utils ========================
@@ -214,14 +229,19 @@ export default {
 .task {
   margin: 0.8rem 0;
   border-radius: 0.3rem;
-  background-color: $light;
+  background-color: $grey-lighter;
+  &>div:nth-of-type(2) {/*fix for vertical gap between .task-note and .task-body*/
+    margin-top:0;
+    padding-top:0;
+  }
 }
 /* =================== TASK HEADER =================== */
 .task-header {
   display: flex;
   flex-wrap:wrap;
   align-items: center;
-  background-color: $light;
+  background-color: $white;
+  border: 1px solid $grey-lighter;
   border-radius: 0.3rem;
   padding: 1rem;
 
@@ -239,6 +259,7 @@ export default {
     }
 
     @media screen and (max-width: 450px) {
+      width: 100%;
       .timer, .task-status {
         width: 100%;
       }
@@ -256,15 +277,9 @@ export default {
   }
 }
 .task-header-ctrlbtn {
-  font-size: 1.5rem;
   border-radius: 0.3rem;
   margin: 0.2rem;
-  background-color: $white;
-  &.deleter>a {
-    color: $danger;
-  }
   &>a {
-    color: $grey;
     display: inline-block;
     padding:0.5rem;
   }
@@ -273,41 +288,22 @@ export default {
     font-size: small;
   }
 }
-
+/* =================== TASK NOTE =================== */
+.task-note {
+  background-color: $light;
+  padding: 0.2rem;
+  margin: 0.5rem;
+  border-radius: 0.3rem;
+  &>div {
+    padding: 0.5rem;
+    background-color: $white;
+    border-radius: 0.3rem;
+  }
+}
 /* =================== TASK BODY =================== */
-/* animations */
-.latepop-enter-active {
-  animation: latepop 1s;
-}
-.latepop-leave-active {
-  animation: latepop 0.4s reverse;
-}
-@keyframes latepop {
-  0% { opacity: 0; }
-  30% { opacity: 0; }
-  100% { opacity: 1; }
-}
-.slide-down-enter-active {
-  animation: slide 0.4s;
-}
-.slide-down-leave-active {
-  animation: slide 0.5s reverse;
-}
-@keyframes slide {
-  0% {
-    transform: translateY(-20%);
-  }
-  60% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(0%);
-  }
-}
-/* end animations */
 .task-body {
   margin-bottom: 0.5rem;
-  padding: 0 0.5rem;
+  padding: 0.5rem;
 }
 .task-meta-cells {
   display:flex;
@@ -319,19 +315,6 @@ export default {
     margin:0;
     border-radius: 0;
   }
-  /*
-  @media screen and (max-width: 460px) {
-    .timer {
-      font-size: 1rem;
-    }
-  }
-  @media screen and (max-width: 420px) {
-    .timer {
-      flex-direction: column;
-      padding: 0.15em;
-    }
-  }
-  */
 }
 .task-meta-cell, .task-value-cell {
   text-align: center;
@@ -414,4 +397,35 @@ export default {
     }
   }
 }
+
+/* ========== animations ============ */
+.latepop-enter-active {
+  animation: latepop 1s;
+}
+.latepop-leave-active {
+  animation: latepop 0.4s reverse;
+}
+@keyframes latepop {
+  0% { opacity: 0; }
+  30% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.slide-down-enter-active {
+  animation: slide 0.4s;
+}
+.slide-down-leave-active {
+  animation: slide 0.5s reverse;
+}
+@keyframes slide {
+  0% {
+    transform: translateY(-20%);
+  }
+  60% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+/* end animations */
 </style>

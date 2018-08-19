@@ -1,41 +1,34 @@
 <template>
-<div class="timer">
-  <div class="timer-digits">
-    <span class="timer-digits-hrs" :class="{'active': elapsedHours > 0}" >{{ elapsedHours | zeroPad }}</span>
-    <span class="timer-digits-sep">:</span>
-    <span class="timer-digits-mins" :class="{'active': elapsedMinutes > 0}">{{ elapsedMinutes | zeroPad }}</span>
-    <span class="timer-digits-sep">:</span>
-    <span class="timer-digits-secs" :class="{'active': elapsedSeconds > 0}">{{ elapsedSeconds | zeroPad }}</span>
-  </div>
-  <!--  THE BUTTONS  -->
-  <div class="timer-buttons buttons has-addons">
-    <!--  START / PAUSE TOGGLE    -->
-    <button class="button  is-dark is-small timer-btn timer-btn-start" v-if="paused" @click="startTimer">
-      <span class="icon">
-        <font-awesome-icon :icon="['fas', 'play-circle']" />
-      </span>
-    </button>   
-    <button class="button  is-dark is-small timer-btn timer-btn-stop" v-else @click="pauseTimer"> 
-      <span class="icon">
-        <font-awesome-icon :icon="['fas', 'pause-circle']" />
-      </span>
-    </button>
-    
-    <!--  RESET BUTTON   -->
-    <button class="button  is-dark is-small timer-btn timer-btn-reset" @click="resetTimer">
-      <span class="icon">
-        <font-awesome-icon :icon="['fas', 'undo']" />
-      </span>
-    </button>
-
-    <!--  SAVE BUTTON   -->
-    <button class="button  is-dark is-small timer-btn timer-btn-save" @click="saveElapsedTime">
-      <span class="icon">
-        <font-awesome-icon :icon="['fas', 'check-circle']" />
-      </span>
-    </button>
-
-  </div>
+  <div class="timer">
+    <div class="timer-digits">
+      <span class="timer-digits-hrs" :class="{'active': elapsedHours > 0}" >{{ elapsedHours | zeroPad }}</span>
+      <span class="timer-digits-sep">:</span>
+      <span class="timer-digits-mins" :class="{'active': elapsedMinutes > 0}">{{ elapsedMinutes | zeroPad }}</span>
+      <span class="timer-digits-sep">:</span>
+      <span class="timer-digits-secs" :class="{'active': elapsedSeconds > 0}">{{ elapsedSeconds | zeroPad }}</span>
+    </div>
+    <div class="timer-buttons buttons has-addons">
+      <button class="button  is-dark is-small timer-btn timer-btn-start" v-if="paused" @click="startTimer">
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'play-circle']" />
+        </span>
+      </button>   
+      <button class="button  is-dark is-small timer-btn timer-btn-stop" v-else @click="pauseTimer"> 
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'pause-circle']" />
+        </span>
+      </button>
+      <button class="button  is-dark is-small timer-btn timer-btn-reset" @click="resetTimer">
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'undo']" />
+        </span>
+      </button>
+      <button class="button  is-dark is-small timer-btn timer-btn-save" @click="saveElapsedTime">
+        <span class="icon">
+          <font-awesome-icon :icon="['fas', 'check-circle']" />
+        </span>
+      </button>
+    </div>
   </div>
 </template>
 
