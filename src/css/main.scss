@@ -6,6 +6,9 @@ $family-primary: 'Nunito';
 @import './status.scss';
 
 /* very general, high-level, app-wide styling that refers to core variables only */
+body {
+  min-width: 340px;
+}
 .view-wrapper {
   margin: 3em;
   h1 {

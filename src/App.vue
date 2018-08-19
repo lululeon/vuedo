@@ -13,12 +13,24 @@ import Vue from 'vue';
 import EventHub from 'vue-event-hub';
 Vue.use(EventHub);
 
-// >>> fontawesome setup for vue.js
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
-import fontawesome from '@fortawesome/fontawesome';
-import solid from '@fortawesome/fontawesome-free-solid';
-fontawesome.library.add(solid); // Use any icon from the Solid style
-Vue.component('font-awesome-icon', FontAwesomeIcon); // Use the icon component anywhere in the app
+// // >>> fontawesome setup for vue.js
+// import fontawesome from '@fortawesome/fontawesome';
+// import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
+// import solid from '@fortawesome/fontawesome-free-solid';
+// //for the other styles (and pro, if u have licence), import items individually:
+// import { faCommentAlt, faCommentDots } from '@fortawesome/free-regular-svg-icons';
+// fontawesome.library.add(solid); // Use any icon from the Solid style
+// fontawesome.library.add(faCommentAlt); // Use any icon from the Regular style
+// // <<<
+
+
+// >>> updated fontawesom setup for vue.js
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons'; // 'fas' icons
+import { faCommentDots, faCommentAlt, faCheckCircle, faTimesCircle} from '@fortawesome/free-regular-svg-icons'; //'far' icons
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+library.add(fas, faCommentDots, faCommentAlt, faCheckCircle, faTimesCircle);
+Vue.component('font-awesome-icon', FontAwesomeIcon); // Use anywhere
 // <<<
 
 import { store } from '@/store/store'; //vuex
