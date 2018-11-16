@@ -44,14 +44,10 @@ export default {
   },
   data() {
     return {
-      dayTemplateType: "Daily",
-      selectedTab: 'tasks'
+      dayTemplateType: "Daily"
     }
   },
   methods: {
-    selectTab(tabName) {
-      this.selectedTab = tabName;
-    }
   }
 }
 </script>
