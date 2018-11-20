@@ -4,8 +4,43 @@ import uuidv1 from 'uuid/v1';
 import { persistencePlugin } from './persistencePlugin';
 Vue.use(Vuex);
 
+const overwriteStore = (state, importPayload) => {
+  console.log("**** overwriting store!!!***", importPayload); //eslint-disable-line no-console
+  //cannot mutate root obj; breaks reactivity... so doing properties one by one...
+  state.username = importPayload.username || 'anonymous';
+  state.goals = importPayload.goals || [];
+  state.tasks = importPayload.tasks || [];
+  state.executionLog = importPayload.executionLog || [];
+  state.sentimentLog = importPayload.sentimentLog || [];
+
+  //descending order of events necessary for chronology-based logic:
+  if (state.executionLog.length > 1) {
+    state.executionLog.sort((a, b) => {
+      const datetimestringA = a.timestamp.toLowerCase();
+      const datetimestringB = b.timestamp.toLowerCase();
+      //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
+      if (datetimestringA > datetimestringB) {
+        return -1;
+      }
+      return 1;
+    });
+  }
+  if (state.sentimentLog.length > 1) {
+    state.sentimentLog.sort((a, b) => {
+      const datetimestringA = a.timestamp.toLowerCase();
+      const datetimestringB = b.timestamp.toLowerCase();
+      //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
+      if (datetimestringA > datetimestringB) {
+        return -1;
+      }
+      return 1;
+    });
+  }
+}
+
 export const store = new Vuex.Store({
   state: {
+    initialized: false,
     username: 'anonymous',
     goals: [],
     tasks: [],
@@ -13,13 +48,19 @@ export const store = new Vuex.Store({
     sentimentLog: []
   },
   mutations: {
-    initialize(state, initPayload) {
+    initialize(state, persistedState) {
+      overwriteStore(state, { tasks: persistedState });
+      Vue.set(state, 'initialized', true);
+    },
+    import(state, importPayload) {
+      overwriteStore(state, importPayload);
+      /*
       //cannot mutate root obj; breaks reactivity... so doing properties one by one...
-      state.username = initPayload.username || 'anonymous';
-      state.goals = initPayload.goals;
-      state.tasks = initPayload.tasks;
-      state.executionLog = initPayload.executionLog;
-      state.sentimentLog = initPayload.sentimentLog;
+      state.username = importPayload.username || 'anonymous';
+      state.goals = importPayload.goals;
+      state.tasks = importPayload.tasks;
+      state.executionLog = importPayload.executionLog;
+      state.sentimentLog = importPayload.sentimentLog;
 
       //descending order of events necessary for chronology-based logic:
       if (state.executionLog.length > 1) {
@@ -44,6 +85,7 @@ export const store = new Vuex.Store({
           return 1;
         });
       }
+      */
     },
     updateUsername(state, updatedName) {
       Vue.set(state, 'username', updatedName);

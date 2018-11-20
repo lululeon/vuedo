@@ -1,6 +1,7 @@
 /* eslint-disable */
 // import VuexPersistence from 'vuex-persist';
 import localforage from 'localforage';
+import localforageGetItems from 'localforage-getitems';
 
 const idxDbVersion = 1.0; // todo: move to an env var
 
@@ -21,9 +22,9 @@ taskPersistenceService.setDriver([
 ])
 .then(() => {
   console.log('************ database ready!! **************');
-  taskPersistenceService.setItem('testkey', 'testvalue', function() {
-    console.log('Using:' + taskPersistenceService.driver());
-  });
+  // taskPersistenceService.setItem('testkey', 'testvalue', function() {
+  //   console.log('Using:' + taskPersistenceService.driver());
+  // });
 })
 .catch(error => {
   console.log('woooops!!!', error);
