@@ -29,6 +29,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons'; // 'fas' icons
 import { faCommentDots, faCommentAlt, faCheckCircle, faTimesCircle} from '@fortawesome/free-regular-svg-icons'; //'far' icons
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { getPersistedState } from './store/statemapping';
 library.add(fas, faCommentDots, faCommentAlt, faCheckCircle, faTimesCircle);
 Vue.component('font-awesome-icon', FontAwesomeIcon); // Use anywhere
 // <<<
@@ -44,13 +45,22 @@ export default {
   },
   data() {
     return {
-      dayTemplateType: "Daily",
-      selectedTab: 'tasks'
+      dayTemplateType: "Daily"
     }
   },
   methods: {
-    selectTab(tabName) {
-      this.selectedTab = tabName;
+  },
+  mounted() {
+    if (!this.$store.initialized) {
+      getPersistedState()
+      .then(persistedState => {
+        console.log('*** this is what was fetched from indexeddb:', persistedState); //eslint-disable-line no-console
+        this.$store.commit('initialize', persistedState);
+      })
+      .catch(error => {
+        //TODO handle properly / ui msg
+        console.log('an error occured while loading from cache:', error); // eslint-disable-line no-console
+      });
     }
   }
 }

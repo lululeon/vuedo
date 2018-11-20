@@ -1,13 +1,5 @@
 <template>
   <div>
-    <!--
-    <div class="tabs">
-      <ul>
-        <li :class="{'is-active': selectedTab === 'tasks'}" @click="selectTab('tasks')"><router-link to="/tasks/current">Tasks</router-link></li>
-        <li :class="{'is-active': selectedTab === 'logs'}" @click="selectTab('logs')"><router-link to="/tasks/logs">Raw Logs</router-link></li>
-      </ul>
-    </div>
-    -->
     <article class="notification tile is-child" v-if="showEmptyListNotif">
       <p class="title">Get going!</p>
       <p class="subtitle">You don't seem to have anything to do!! Let's change that:</p>

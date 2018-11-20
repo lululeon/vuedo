@@ -2,7 +2,6 @@ _unused
 .DS_Store
 node_modules
 /dist
-_unused
 
 # local env files
 .env.local
