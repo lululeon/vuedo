@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import uuidv1 from 'uuid/v1';
+import { persistencePlugin } from './persistencePlugin';
 Vue.use(Vuex);
-
 
 export const store = new Vuex.Store({
   state: {
@@ -106,7 +106,8 @@ export const store = new Vuex.Store({
     // sentimentLog (state) {
     //   return state.sentimentLog;
     // }
-  }
+  },
+  plugins: [persistencePlugin]
 });
 
 export default {

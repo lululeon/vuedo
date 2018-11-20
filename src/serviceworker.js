@@ -5,6 +5,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-useless-escape */
 
+/*
 import idb from 'idb';
 
 function createDB() {
@@ -34,6 +35,7 @@ self.addEventListener('activate', function(event) {
     createDB()
   );
 });
+*/
 
 /* eslint-enable no-useless-escape */
 /* eslint-enable no-undef */
