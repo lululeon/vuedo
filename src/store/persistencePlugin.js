@@ -28,7 +28,7 @@ export const persistencePlugin = (store) => {
       if(mutation.type === 'import') {
         deletePersistedState()
         .then(() => {
-          return setPersistedState(state);
+          setPersistedState(state);
         })
         .catch(err => console.warn('failed to persist imported state', err)); //eslint-disable-line no-console
       } else if(mutation.type === 'deleteTask') {
@@ -39,21 +39,21 @@ export const persistencePlugin = (store) => {
           return deletePersistedTask(mutation.payload);
         })
         .then(() => {
-          return setPersistedState(state);
+          setPersistedState(state);
         })
         .catch(err => console.warn('failed to delete persisted task', err)); //eslint-disable-line no-console
       } else if(mutation.type === 'undoExecutionLogByTaskId') {
         deletePersistedExecLogs()
         .then(() => {
-          return setPersistedState(state);
+          setPersistedState(state);
         })
-        .catch(err => console.warn('failed to delete persisted execution logs', err)); //eslint-disable-line no-console
+        .catch(err => console.warn('failed to handle persistence for [undoExecutionLogByTaskId] mutation', err)); //eslint-disable-line no-console
       } else if (mutation.type === 'updateUsername') {
         deletePersistedProfile()
         .then(() => {
-          return setPersistedProfile();
+          setPersistedProfile(state);
         })
-        .catch(err => console.warn('failed to delete persisted execution logs', err)); //eslint-disable-line no-console
+        .catch(err => console.warn('failed to handle persistence for [updateUsername] mutation', err)); //eslint-disable-line no-console
       } else {
         //TODO: less monolithic handling of additive changes
         setPersistedState(state).catch(err => console.warn('failed to persist state', err)); //eslint-disable-line no-console

@@ -5,9 +5,6 @@ import { persistencePlugin } from './persistencePlugin';
 Vue.use(Vuex);
 
 const overwriteStore = (state, importPayload) => {
-  if(!importPayload && !state.initialized) {
-    return; //quietly quit - there was just no persisted state in the browser.
-  }
   //cannot mutate root obj; breaks reactivity... so doing properties one by one...
   state.username = importPayload.username || 'anonymous';
   state.goals = importPayload.goals || [];

@@ -1,4 +1,5 @@
-import { 
+import _kebabCase from 'lodash/kebabCase';
+import {
   profilePersistenceService,
   taskPersistenceService,
   execlogPersistenceService } from './vuexIdxDb';
@@ -9,7 +10,7 @@ export const setPersistedState = (state) => {
   const taskPromises = [];
   const execlogPromises = [];
   return profilePersistenceService.setItem(
-    persistedState.profile.username, 
+    _kebabCase(persistedState.profile.username), //can't have spaces in key
     persistedState.profile
   )
   .then(() => {
@@ -29,7 +30,7 @@ export const setPersistedState = (state) => {
 export const getPersistedState = () => {
   const persistedState = {};
   return profilePersistenceService.getItems().then(profiles => {
-    persistedState.username = Object.values(profiles)[0].username; //temp, till FE catches up with profile obj
+    persistedState.username = Object.values(profiles)[0].username || ''; //temp, till FE catches up with profile obj
     return taskPersistenceService.getItems();
   })
   .then(tasks => {
@@ -47,7 +48,7 @@ export const getPersistedState = () => {
 export const setPersistedProfile = (state) => {
   const persistedState = mapToPersistedState(state);
   return profilePersistenceService.setItem(
-    persistedState.profile.username, 
+    _kebabCase(persistedState.profile.username), 
     persistedState.profile
   );
 }
