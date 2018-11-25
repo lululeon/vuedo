@@ -3,21 +3,50 @@ import localforageGetItems from 'localforage-getitems'; // eslint-disable-line n
 
 const idxDbVersion = 1.0; // todo: move to an env var
 
+// const persistenceStores = ['profile','tasks','execlog']; // shorthand for defining and instantiating localForage instances
 
+// const persistenceServices = [];
+
+// const browserPersistenceSetup = () => {
+//   persistenceStores.forEach(storeName => {
+//     export const taskPersistenceService = localforage.createInstance({
+//       // key: "vdu_tasks",
+//       name: "vuedo", //database name
+//       version : idxDbVersion,
+//       storeName : 'tasks' //alphanumeric, underscores.
+//     });
+    
+//   })
+// }
+
+export const profilePersistenceService = localforage.createInstance({
+  name: "vuedo",
+  version : idxDbVersion,
+  storeName : 'profile'
+});
 export const taskPersistenceService = localforage.createInstance({
   // key: "vdu_tasks",
   name: "vuedo", //database name
   version : idxDbVersion,
   storeName : 'tasks' //alphanumeric, underscores.
 });
-export const profilePersistenceService = localforage.createInstance({
+export const execlogPersistenceService = localforage.createInstance({
   name: "vuedo",
   version : idxDbVersion,
-  storeName : 'profile'
+  storeName : 'execlog'
 });
 
 
 //see https://codepen.io/thgreasi/pen/ojYKeE?editors=1111
+profilePersistenceService.setDriver([
+  localforage.INDEXEDDB,
+  localforage.WEBSQL,
+  localforage.LOCALSTORAGE
+])
+.catch(error => {
+  //TODO: proper logging framework
+  console.log('woooops!!!', error); // eslint-disable-line no-console
+});
 taskPersistenceService.setDriver([
   localforage.INDEXEDDB,
   localforage.WEBSQL, // fallback
@@ -27,7 +56,7 @@ taskPersistenceService.setDriver([
   //TODO: proper logging framework
   console.log('woooops!!!', error); // eslint-disable-line no-console
 });
-profilePersistenceService.setDriver([
+execlogPersistenceService.setDriver([
   localforage.INDEXEDDB,
   localforage.WEBSQL,
   localforage.LOCALSTORAGE
@@ -40,6 +69,7 @@ profilePersistenceService.setDriver([
 
 
 export default {
+  profilePersistenceService,
   taskPersistenceService,
-  profilePersistenceService
+  execlogPersistenceService
 }

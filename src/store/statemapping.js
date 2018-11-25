@@ -1,18 +1,28 @@
-import { taskPersistenceService, profilePersistenceService } from './vuexIdxDb';
+import { 
+  profilePersistenceService,
+  taskPersistenceService,
+  execlogPersistenceService } from './vuexIdxDb';
 
 export const setPersistedState = (state) => {
+  //TODO: detect changes only!
   const persistedState = mapToPersistedState(state);
   const taskPromises = [];
+  const execlogPromises = [];
   return profilePersistenceService.setItem(
     persistedState.profile.username, 
     persistedState.profile
   )
   .then(() => {
     persistedState.tasks.forEach(task => {
-      //TODO: detect changes only!
       taskPromises.push(taskPersistenceService.setItem(task.id, task));
     });
     return Promise.all(taskPromises); 
+  })
+  .then(() => {
+    persistedState.executionLog.forEach(execlog => {
+      execlogPromises.push(execlogPersistenceService.setItem(execlog.timestamp, execlog));
+    });
+    return Promise.all(execlogPromises);
   });
 };
 
@@ -24,22 +34,49 @@ export const getPersistedState = () => {
   })
   .then(tasks => {
     persistedState.tasks = Object.values(tasks);
+    return execlogPersistenceService.getItems();
+  })
+  .then(execlogs => {
+    persistedState.executionLog = Object.values(execlogs);
     console.log('persistedState:', persistedState); // eslint-disable-line no-console
     return persistedState;
   });
 }
 
-export const deletePersistedState = (deletionKey) => {
-  if(deletionKey) {
-    return taskPersistenceService.removeItem(deletionKey);
-  } else {
+/* ================== granular actions ====================== */
+export const setPersistedProfile = (state) => {
+  const persistedState = mapToPersistedState(state);
+  return profilePersistenceService.setItem(
+    persistedState.profile.username, 
+    persistedState.profile
+  );
+}
+export const deletePersistedTask = (deletionKey) => {
+  return taskPersistenceService.removeItem(deletionKey);
+}
+
+export const deletePersistedProfile = () => {
+  return profilePersistenceService.clear();
+}
+
+export const deletePersistedExecLogs = () => {
+  return execlogPersistenceService.clear();
+}
+
+export const deletePersistedState = () => {
+  return profilePersistenceService.clear()
+  .then(() => {
     return taskPersistenceService.clear();
-  }
+  })
+  .then(() => {
+    return execlogPersistenceService.clear();
+  });
 }
 
 export const mapToPersistedState = (state) => {
   return ({ 
+    profile: { username: state.username },
     tasks: state.tasks,
-    profile: { username: state.username }
+    executionLog: state.executionLog
   });
 };
