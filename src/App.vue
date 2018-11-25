@@ -58,8 +58,9 @@ export default {
         this.$store.commit('initialize', persistedState);
       })
       .catch(error => {
-        //TODO handle properly / ui msg
-        console.log('an error occured while loading from cache:', error); // eslint-disable-line no-console
+        // TODO handle properly / ui msg
+        // TODO distinguish no cache from existing cache unable to load
+        console.log('could not load from cache:', error); // eslint-disable-line no-console
       });
     }
   }

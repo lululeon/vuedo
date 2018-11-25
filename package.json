@@ -22,6 +22,7 @@
     "json-beautify": "^1.0.1",
     "localforage": "^1.7.3",
     "localforage-getitems": "^1.4.2",
+    "lodash": "^4.17.11",
     "mathjs": "^4.2.2",
     "moment": "^2.22.1",
     "register-service-worker": "^1.5.2",
