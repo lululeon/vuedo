@@ -1,32 +1,32 @@
-import { taskPersistenceService } from './vuexIdxDb';
+import { taskPersistenceService, profilePersistenceService } from './vuexIdxDb';
 
 export const setPersistedState = (state) => {
   const persistedState = mapToPersistedState(state);
-  const promises = [];
-  return new Promise((resolve, reject) => {
+  const taskPromises = [];
+  return profilePersistenceService.setItem(
+    persistedState.profile.username, 
+    persistedState.profile
+  )
+  .then(() => {
     persistedState.tasks.forEach(task => {
       //TODO: detect changes only!
-      promises.push(taskPersistenceService.setItem(task.id, task));
+      taskPromises.push(taskPersistenceService.setItem(task.id, task));
     });
-
-    Promise.all(promises)
-    .then(result => {
-      resolve(result);
-    })
-    .catch(error => {
-      reject(error);
-    })
+    return Promise.all(taskPromises); 
   });
 };
 
-export const getPersistedState = (fetchKey) => {
-  if(fetchKey) {
-    return taskPersistenceService.getItem(fetchKey);
-  } else {
-    return taskPersistenceService.getItems().then(resultObj => {
-      return Promise.resolve(Object.values(resultObj));
-    });
-  }
+export const getPersistedState = () => {
+  const persistedState = {};
+  return profilePersistenceService.getItems().then(profiles => {
+    persistedState.username = Object.values(profiles)[0].username; //temp, till FE catches up with profile obj
+    return taskPersistenceService.getItems();
+  })
+  .then(tasks => {
+    persistedState.tasks = Object.values(tasks);
+    console.log('persistedState:', persistedState); // eslint-disable-line no-console
+    return persistedState;
+  });
 }
 
 export const deletePersistedState = (deletionKey) => {
@@ -38,6 +38,8 @@ export const deletePersistedState = (deletionKey) => {
 }
 
 export const mapToPersistedState = (state) => {
-  //handle tasks only for now
-  return ({ tasks: state.tasks });
+  return ({ 
+    tasks: state.tasks,
+    profile: { username: state.username }
+  });
 };
