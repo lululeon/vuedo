@@ -1,8 +1,10 @@
 module.exports = {
-  pwa: { name: 'Vuedo',
-    themeColor: '#209cee',
-    msTileColor: '#FFFFFF',
-
+  // see: https://www.npmjs.com/package/@vue/cli-plugin-pwa
+  // warning: at time of writing this does not actually spit out manifest.json. In fact,
+  // it has nothing to do with manifest.json besides injecting a link to the manifest file.
+  // This only injects meta and link items into the <head> tag. So stripped any such settings
+  // out of here and hand-rolled my own public/manifest.json.
+  pwa: {     
     //GenerateSW : only caches files according to the given options. rigid, can't modify.
     //InjectManifest: configurable! use this.
     workboxPluginMode: 'InjectManifest',
