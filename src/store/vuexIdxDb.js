@@ -3,22 +3,6 @@ import localforageGetItems from 'localforage-getitems'; // eslint-disable-line n
 
 const idxDbVersion = 1.0; // todo: move to an env var
 
-// const persistenceStores = ['profile','tasks','execlog']; // shorthand for defining and instantiating localForage instances
-
-// const persistenceServices = [];
-
-// const browserPersistenceSetup = () => {
-//   persistenceStores.forEach(storeName => {
-//     export const taskPersistenceService = localforage.createInstance({
-//       // key: "vdu_tasks",
-//       name: "vuedo", //database name
-//       version : idxDbVersion,
-//       storeName : 'tasks' //alphanumeric, underscores.
-//     });
-    
-//   })
-// }
-
 export const profilePersistenceService = localforage.createInstance({
   name: "vuedo",
   version : idxDbVersion,

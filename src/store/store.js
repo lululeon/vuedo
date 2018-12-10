@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import uuidv1 from 'uuid/v1';
-import { persistencePlugin } from './persistencePlugin';
+// import { persistencePlugin } from './persistencePlugin';
+import { vuexPlugin } from './localDBPlugin';
+
 Vue.use(Vuex);
 
 const overwriteStore = (state, importPayload) => {
@@ -116,7 +118,7 @@ export const store = new Vuex.Store({
     //   return state.sentimentLog;
     // }
   },
-  plugins: [persistencePlugin]
+  plugins: [vuexPlugin]
 });
 
 export default {
