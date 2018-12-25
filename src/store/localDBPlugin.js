@@ -14,7 +14,7 @@ const ofInterest = (mutation) => {
   return taskMutationsOfInterest.includes(mutation);
 };
 
-const db = new PouchDB('vdo-local');
+const db = new PouchDB('vdo-local', {revs_limit: 1, auto_compaction: true});
 const couchUser = process.env.VUE_APP_COUCH_USER;
 const couchPass = process.env.VUE_APP_COUCH_PASS;
 const couchHost = process.env.VUE_APP_COUCH_HOST;
@@ -37,6 +37,25 @@ const mapToPersistedState = (state) => {
     executionLog: state.executionLog
   });
 }
+
+// -------- task handling --------------
+const deletePersistedTask = (taskId) => {
+  return db.get(taskId)
+  .then(task => {
+    console.log('got back the item we want to delete:', task); // eslint-disable-line no-console
+    return db.remove(task);
+  });
+}
+// const deletePersistedState = () => {
+//   // return profilePersistenceService.clear()
+//   // .then(() => {
+//   db.remove(todo);
+//   return taskPersistenceService.clear();
+//   // })
+//   // .then(() => {
+//   //   return execlogPersistenceService.clear();
+//   // });
+// }
 
 const getPersistedState = () => {
   const persistedState = {};
@@ -76,6 +95,7 @@ const setPersistedState = (state) => {
   // .then(() => {
     persistedState.tasks.forEach(task => {
       if(!task._id) {
+        //net new tasks: these will be assigned a revision that needs to be pushed back to vuex
         taskPromises.push(db.put(Object.assign({}, { _id: task.id}, task)));
       } else {
         taskPromises.push(db.put(task));
@@ -91,6 +111,7 @@ const setPersistedState = (state) => {
   // });
 }
 
+// custom store plugin
 export const vuexPlugin = (store) => {
   store.subscribe((mutation, state) => {
     if (ofInterest(mutation.type)) {
@@ -100,18 +121,22 @@ export const vuexPlugin = (store) => {
       //     this.setPersistedState(state);
       //   })
       //   .catch(err => console.warn('failed to persist imported state', err)); //eslint-disable-line no-console
-      // } 
-      // else if(mutation.type === 'deleteTask') {
-      //   //TODO: more granular handling
-      //   //TODO: the payload is literally the id. should stick to homogenous/sensible payload shapes...
-      //   deletePersistedExecLogs()
-      //   .then(() => {
-      //     return deletePersistedTask(mutation.payload);
-      //   })
-      //   .then(() => {
-      //     setPersistedState(state);
-      //   })
-      //   .catch(err => console.warn('failed to delete persisted task', err)); //eslint-disable-line no-console
+      // } else 
+      if(mutation.type === 'deleteTask') {
+        //TODO: more granular handling
+        //TODO: the payload is literally the id. should stick to homogenous/sensible payload shapes...
+        // deletePersistedExecLogs()
+        // .then(() => {
+          deletePersistedTask(mutation.payload)
+          .then(result => {
+            console.log('Deletion Result:', result); //eslint-disable-line no-console
+          })
+          .catch(err => console.warn('failed to delete persisted task', err)); //eslint-disable-line no-console
+        // })
+        // .then(() => {
+        //   setPersistedState(state);
+        // })
+        // .catch(err => console.warn('failed to delete persisted task', err)); //eslint-disable-line no-console
       // } else if(mutation.type === 'undoExecutionLogByTaskId') {
       //   deletePersistedExecLogs()
       //   .then(() => {
@@ -124,10 +149,10 @@ export const vuexPlugin = (store) => {
       //     setPersistedProfile(state);
       //   })
       //   .catch(err => console.warn('failed to handle persistence for [updateUsername] mutation', err)); //eslint-disable-line no-console
-      // } else {
-        //TODO: less monolithic handling of additive changes
+      } else {
+        // TODO: less monolithic handling of additive changes
         setPersistedState(state).catch(err => console.warn('failed to persist state', err)); //eslint-disable-line no-console
-      // }
+      }
     }
   });
 }
@@ -136,6 +161,8 @@ export const vuexPlugin = (store) => {
 // custom Vue plugin (not Store plugin)
 export const LocalDB = {
   install(Vue) {
+    if(Vue.$eventHub)
+    
     db.changes({
       since: 'now',
       live: true
