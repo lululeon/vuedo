@@ -63,7 +63,7 @@ export const store = new Vuex.Store({
       const tasks = state.tasks;
       Vue.set(state, 'tasks', [...tasks, newTask]);
     },
-    updateTask(state, updatedTask) {
+    updatedTask(state, updatedTask) {
       let tasks = state.tasks;
       for (let i = 0; i < tasks.length; i++) {
         const curTask = tasks[i];

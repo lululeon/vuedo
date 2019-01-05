@@ -3,7 +3,7 @@ import PouchDB from 'pouchdb';
 const taskMutationsOfInterest = [
   'import',
   'newTask',
-  'updateTask',
+  'updatedTask',
   'deleteTask',
   'updateUsername',
   'newExecutionLog',
@@ -44,6 +44,16 @@ const mapToPersistedState = (state) => {
 // -------- task handling --------------
 const addPersistedTask = (task) => {
   return db.put(Object.assign({}, { _id: task.id}, task));
+}
+const updatePersistedTask = (task) => {
+  return db.get(task.id)
+  .then(taskToUpdate => {
+    console.log('got back the item we want to update:', taskToUpdate); // eslint-disable-line no-console
+    taskToUpdate.description = task.description;
+    taskToUpdate.targetReached = task.targetReached;
+    taskToUpdate.metric = task.metric;
+    return db.put(taskToUpdate);
+  });
 }
 
 const deletePersistedTask = (taskId) => {
@@ -135,6 +145,13 @@ export const vuexPlugin = (store) => {
           console.log('Add new task result:', result); //eslint-disable-line no-console
         })
         .catch(err => console.warn('failed to add new task', err)); //eslint-disable-line no-console
+      }
+      else if (mutation.type === 'updatedTask') {
+        updatePersistedTask(mutation.payload)
+        .then(result => {
+          console.log('Updated task result:', result); //eslint-disable-line no-console
+        })
+        .catch(err => console.warn('failed to update task', err)); //eslint-disable-line no-console
       }
       else if (mutation.type === 'deleteTask') {
         //TODO: more granular handling
