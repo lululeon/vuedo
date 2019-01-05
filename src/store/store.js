@@ -59,10 +59,9 @@ export const store = new Vuex.Store({
     updateUsername(state, updatedName) {
       Vue.set(state, 'username', updatedName);
     },
-    addTask(state, newTask) {
+    newTask(state, newTask) {
       const tasks = state.tasks;
-      const finalizedTask = Object.assign({}, newTask, {id: uuidv1()});
-      Vue.set(state, 'tasks', [...tasks, finalizedTask]);
+      Vue.set(state, 'tasks', [...tasks, newTask]);
     },
     updateTask(state, updatedTask) {
       let tasks = state.tasks;
@@ -103,6 +102,12 @@ export const store = new Vuex.Store({
       Vue.set(state, 'tasks', taskList);
       Vue.set(state, 'executionLog', logList);
     }
+  },
+  actions: { //see: https://vuex.vuejs.org/guide/actions.html
+    addTask({commit}, newTask) {
+      const finalizedTask = Object.assign({}, newTask, {id: uuidv1()});
+      commit('newTask', finalizedTask);
+    },
   },
   getters: {
     // goals (state) {

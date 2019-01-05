@@ -122,7 +122,7 @@ export default {
           stepSize: stepsz
         }
       };
-      this.$store.commit('addTask', taskToSave);
+      this.$store.dispatch('addTask', taskToSave);
       this.clearInputErrors();
     },
     clearInputErrors() {

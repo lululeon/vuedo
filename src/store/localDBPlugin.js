@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb';
 
 const taskMutationsOfInterest = [
   'import',
-  'addTask',
+  'newTask',
   'updateTask',
   'deleteTask',
   'updateUsername',
@@ -14,7 +14,10 @@ const ofInterest = (mutation) => {
   return taskMutationsOfInterest.includes(mutation);
 };
 
-const db = new PouchDB('vdo-local', {revs_limit: 1, auto_compaction: true});
+const db = new PouchDB('vdo-local', {
+  //revs_limit: 1, //bad! worst value u cld set. leave this alone for now...
+  auto_compaction: true
+});
 const couchUser = process.env.VUE_APP_COUCH_USER;
 const couchPass = process.env.VUE_APP_COUCH_PASS;
 const couchHost = process.env.VUE_APP_COUCH_HOST;
@@ -39,6 +42,10 @@ const mapToPersistedState = (state) => {
 }
 
 // -------- task handling --------------
+const addPersistedTask = (task) => {
+  return db.put(Object.assign({}, { _id: task.id}, task));
+}
+
 const deletePersistedTask = (taskId) => {
   return db.get(taskId)
   .then(task => {
@@ -122,7 +129,14 @@ export const vuexPlugin = (store) => {
       //   })
       //   .catch(err => console.warn('failed to persist imported state', err)); //eslint-disable-line no-console
       // } else 
-      if(mutation.type === 'deleteTask') {
+      if (mutation.type === 'newTask') {
+        addPersistedTask(mutation.payload)
+        .then(result => {
+          console.log('Add new task result:', result); //eslint-disable-line no-console
+        })
+        .catch(err => console.warn('failed to add new task', err)); //eslint-disable-line no-console
+      }
+      else if (mutation.type === 'deleteTask') {
         //TODO: more granular handling
         //TODO: the payload is literally the id. should stick to homogenous/sensible payload shapes...
         // deletePersistedExecLogs()
