@@ -116,7 +116,7 @@ export default {
         //update if changed
         const updTask = this.task;
         updTask.description = updDescr;
-        this.$store.commit('updateTask', updTask);
+        this.$store.commit('updatedTask', updTask);
       }
     },
     updateNote(note) {
