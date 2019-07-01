@@ -45,6 +45,7 @@ const mapToPersistedState = (state) => {
 const addPersistedTask = (task) => {
   return db.put(Object.assign({}, { _id: task.id}, task));
 }
+
 const updatePersistedTask = (task) => {
   return db.get(task.id)
   .then(taskToUpdate => {
@@ -115,6 +116,7 @@ const setPersistedState = (state) => {
         //net new tasks: these will be assigned a revision that needs to be pushed back to vuex
         taskPromises.push(db.put(Object.assign({}, { _id: task.id}, task)));
       } else {
+        // pre-existing items need the revision, for updates (_rev field will be there in obj)
         taskPromises.push(db.put(task));
       }
     });
@@ -146,6 +148,13 @@ export const vuexPlugin = (store) => {
         })
         .catch(err => console.warn('failed to add new task', err)); //eslint-disable-line no-console
       }
+      // TODO: next ticket - #50
+      // else if (mutation.type === 'newExecutionLog') {
+      //   addPersistedExecutionLog(mutation.payload)
+      //   .then(result => {
+      //     console.log('Add execution log result:', result); // eslint-disable-line no-console
+      //   })
+      // }
       else if (mutation.type === 'updatedTask') {
         updatePersistedTask(mutation.payload)
         .then(result => {

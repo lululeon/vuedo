@@ -105,7 +105,7 @@ export const store = new Vuex.Store({
   },
   actions: { //see: https://vuex.vuejs.org/guide/actions.html
     addTask({commit}, newTask) {
-      const finalizedTask = Object.assign({}, newTask, {id: uuidv1()});
+      const finalizedTask = Object.assign({}, newTask, {id: uuidv1(), entityType: 'task' });
       commit('newTask', finalizedTask);
     },
   },
