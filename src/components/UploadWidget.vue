@@ -70,7 +70,7 @@ export default {
     },
     doUpload() {
       const jsonObj = JSON.parse(this.fileContents);
-      this.$store.commit('initialize', jsonObj);
+      this.$store.commit('import', jsonObj);
       this.$router.push('/tasks');
     }
   }

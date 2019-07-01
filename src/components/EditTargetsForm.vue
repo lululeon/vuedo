@@ -119,7 +119,7 @@ export default {
           stepSize: this.step,
         }
       };
-      this.$store.commit('updateTask', updTask);
+      this.$store.commit('updatedTask', updTask);
       this.$eventHub.emit('modalcomplete');
     }
   },

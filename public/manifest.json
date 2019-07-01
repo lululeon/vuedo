@@ -1,0 +1,15 @@
+{
+  "name": "vuedo",
+  "short_name": "vuedo",
+  "start_url": "index.html",
+  "display": "standalone",
+  "theme_color": "#209cee",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "logo-148x148.png",
+      "sizes": "148x148",
+      "type": "image/png"
+    }
+  ]
+}

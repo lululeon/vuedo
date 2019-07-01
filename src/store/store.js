@@ -1,11 +1,47 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import uuidv1 from 'uuid/v1';
+// import { persistencePlugin } from './persistencePlugin';
+import { vuexPlugin } from './localDBPlugin';
+
 Vue.use(Vuex);
 
+const overwriteStore = (state, importPayload) => {
+  //cannot mutate root obj; breaks reactivity... so doing properties one by one...
+  state.username = importPayload.username || 'anonymous';
+  state.goals = importPayload.goals || [];
+  state.tasks = importPayload.tasks || [];
+  state.executionLog = importPayload.executionLog || [];
+  state.sentimentLog = importPayload.sentimentLog || [];
+
+  //descending order of events necessary for chronology-based logic:
+  if (state.executionLog.length > 1) {
+    state.executionLog.sort((a, b) => {
+      const datetimestringA = a.timestamp.toLowerCase();
+      const datetimestringB = b.timestamp.toLowerCase();
+      //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
+      if (datetimestringA > datetimestringB) {
+        return -1;
+      }
+      return 1;
+    });
+  }
+  if (state.sentimentLog.length > 1) {
+    state.sentimentLog.sort((a, b) => {
+      const datetimestringA = a.timestamp.toLowerCase();
+      const datetimestringB = b.timestamp.toLowerCase();
+      //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
+      if (datetimestringA > datetimestringB) {
+        return -1;
+      }
+      return 1;
+    });
+  }
+}
 
 export const store = new Vuex.Store({
   state: {
+    initialized: false,
     username: 'anonymous',
     goals: [],
     tasks: [],
@@ -13,47 +49,21 @@ export const store = new Vuex.Store({
     sentimentLog: []
   },
   mutations: {
-    initialize(state, initPayload) {
-      //cannot mutate root obj; breaks reactivity... so doing properties one by one...
-      state.username = initPayload.username || 'anonymous';
-      state.goals = initPayload.goals;
-      state.tasks = initPayload.tasks;
-      state.executionLog = initPayload.executionLog;
-      state.sentimentLog = initPayload.sentimentLog;
-
-      //descending order of events necessary for chronology-based logic:
-      if (state.executionLog.length > 1) {
-        state.executionLog.sort((a, b) => {
-          const datetimestringA = a.timestamp.toLowerCase();
-          const datetimestringB = b.timestamp.toLowerCase();
-          //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
-          if (datetimestringA > datetimestringB) {
-            return -1;
-          }
-          return 1;
-        });
-      }
-      if (state.sentimentLog.length > 1) {
-        state.sentimentLog.sort((a, b) => {
-          const datetimestringA = a.timestamp.toLowerCase();
-          const datetimestringB = b.timestamp.toLowerCase();
-          //MDN: If compareFunction(a, b) is less than 0, sort a to an index lower than b, i.e. a comes first. Hence '>' => reverse sort.
-          if (datetimestringA > datetimestringB) {
-            return -1;
-          }
-          return 1;
-        });
-      }
+    initialize(state, persistedState) {
+      overwriteStore(state, persistedState);
+      Vue.set(state, 'initialized', true);
+    },
+    import(state, importPayload) {
+      overwriteStore(state, importPayload);
     },
     updateUsername(state, updatedName) {
       Vue.set(state, 'username', updatedName);
     },
-    addTask(state, newTask) {
+    newTask(state, newTask) {
       const tasks = state.tasks;
-      const finalizedTask = Object.assign({}, newTask, {id: uuidv1()});
-      Vue.set(state, 'tasks', [...tasks, finalizedTask]);
+      Vue.set(state, 'tasks', [...tasks, newTask]);
     },
-    updateTask(state, updatedTask) {
+    updatedTask(state, updatedTask) {
       let tasks = state.tasks;
       for (let i = 0; i < tasks.length; i++) {
         const curTask = tasks[i];
@@ -93,6 +103,12 @@ export const store = new Vuex.Store({
       Vue.set(state, 'executionLog', logList);
     }
   },
+  actions: { //see: https://vuex.vuejs.org/guide/actions.html
+    addTask({commit}, newTask) {
+      const finalizedTask = Object.assign({}, newTask, {id: uuidv1(), entityType: 'task' });
+      commit('newTask', finalizedTask);
+    },
+  },
   getters: {
     // goals (state) {
     //   return state.goals;
@@ -106,7 +122,8 @@ export const store = new Vuex.Store({
     // sentimentLog (state) {
     //   return state.sentimentLog;
     // }
-  }
+  },
+  plugins: [vuexPlugin]
 });
 
 export default {
